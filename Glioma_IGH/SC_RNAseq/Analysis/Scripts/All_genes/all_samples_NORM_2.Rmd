@@ -1,0 +1,124 @@
+---
+title: "Defining clusters for merged samples [Normalized]"
+author: "ATIA Safiya"
+date: "2023-06-26"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+library(clustree)
+library("viridis")
+```
+
+## Load seurat object (NORM)
+```{r}
+seurat_obj <- readRDS(file = "Norm_merged_seurat.rds")
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+# Non linear reduction  
+##  <span style="color:#296d98;"> Parameters </span>  
+```{r}
+pca = 30
+8482 -> saved.seed
+set.seed(saved.seed)
+thread = 8
+```
+
+## UMAP
+```{r, warning=FALSE}
+seurat_obj <- RunUMAP(seurat_obj, dims = 1:pca, seed.use = saved.seed, )
+
+DimPlot(metabo_obj, reduction = "umap", group.by = "orig.ident")
+DimPlot(metabo_obj, reduction = "umap", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue',S='tomato3') )
+```
+
+## tSNE
+tSNE with default Perplexity 30 :
+```{r}
+seurat_obj <- RunTSNE(seurat_obj, dims=1:pca,seed.use = saved.seed)
+
+DimPlot(metabo_obj, reduction = "tsne", group.by = "orig.ident")
+DimPlot(metabo_obj, reduction = "tsne", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue',S='tomato3'))
+```
+
+# Defining cell clusters  
+`FindNeighbors`:    
+
+* construction of a KNN graph based on the euclidean distance in PCA space, and refine the edge weights between any two cells based on the shared overlap in their local neighborhoods (Jaccard similarity).
+* *input* : the previously defined dimensionality of the dataset.
+
+`FindClusters`:   
+
+* default : Louvain algorithm  
+* iteratively group cells together, with the goal of optimizing the standard modularity function.  
+* *Resolution* : setting this parameter between 0.4-1.2 typically returns good results for single-cell datasets of around 3K cells
+
+```{r}
+seurat_obj <- FindNeighbors(seurat_obj, dims = 1:pca)
+```
+
+## Save seurat object  
+```{r}
+saveRDS(seurat_obj, file ="merged_seurat_FindNeighbors.rds")
+```
+
+## Optimize resolution  
+```{r, message=FALSE}
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.2)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.3)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.4)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.5)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.6)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.7)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.8)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.9)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 1)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 1.1)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 1.2)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 1.3)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 1.4)
+```
+
+```{r}
+clustree(all_test, prefix = "RNA_snn_res.")
+```

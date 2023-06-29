@@ -1,0 +1,151 @@
+---
+title: "Clusters annotations for merged samples [Normalized]"
+author: "ATIA Safiya"
+date: "2023-06-26"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+library(clustree)
+library('enrichR')
+
+## annotation
+library(CelliD)
+library(ggpubr) #for plotting
+
+library("viridis")
+```
+
+## Load seurat object (NORM)
+```{r}
+seurat_obj <- readRDS(file = "merged_seurat_Mca.rds")
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+# Automated Cell type Annotation  
+```{r}
+as.data.frame(seurat_obj@assays$RNA[,]) -> scina.data
+```
+
+## Oligo/Astro  
+```{r}
+## Some markers of oligo/astro cells
+mature_oligo <- c("SOX8", "SOX11", "CLDN11","MBP","SOX10","SOX4","MOG","MYT1", "CNP", "PLP1", "OLIG1", "OLIG2", "NKX2-2", "ERBB3", "UGT8", "SOX17", "GPR17", "TNR")
+oligo_progenitors  <- c("PDGFRA", "CSPG4")
+astro <- c("SLC1A3", "NFIA","SOX9","GFAP","APOE", "AQP4","ALDH1L1", "FABP7", "TNC")
+
+markers_astro_oligo <- list("astro"=astro, "mature_oligo"=mature_oligo, "oligo_progenitors"=oligo_progenitors)
+```
+
+```{r}
+SCINA(
+  scina.data,
+  markers_astro_oligo, 
+  max_iter = 100, 
+  convergence_n = 10, 
+  convergence_rate = 0.999, 
+  sensitivity_cutoff = 0.9, 
+  rm_overlap=TRUE, 
+  allow_unknown=TRUE
+) -> scina.results
+
+seurat_obj$scina_labels <- scina.results$cell_labels
+```
+
+```{r}
+colors <- c(astro='seagreen4', oligo_progenitors = "#297fb8" ,mature_oligo='orangered3', unknown="lightgray")
+
+DimPlot(seurat_obj,reduction = "umap", pt.size = 1, label = TRUE, group.by = "scina_labels", label.size = 5, cols = colors)
+DimPlot(seurat_obj,reduction = "tsne", pt.size = 1, label = TRUE, group.by = "scina_labels", label.size = 5, cols = colors)
+```
+
+## Panglao database  
+### Obtaining brain cell-type gene signatures  
+```{r,warning=FALSE, message=FALSE}
+# download all cell-type gene signatures from panglaoDB
+panglao <- read_tsv("https://panglaodb.se/markers/PanglaoDB_markers_27_Mar_2020.tsv.gz")
+
+# restricting the analysis to brain specific gene signatues
+panglao_brain <- panglao %>% filter(organ == "Brain")
+  ##             panglao %>%  filter(str_detect(species,"Hs"))
+  ## To obtain gene signatures for all genes
+
+# restricting to human specific genes
+panglao_brain <- panglao_brain %>%  filter(str_detect(species,"Hs"))
+
+# converting dataframes into a list of vectors, which is the format needed as input for CellID
+panglao_brain <- panglao_brain %>%  
+  group_by(`cell type`) %>%  
+  summarise(geneset = list(`official gene symbol`))
+
+brain_signatures <- setNames(panglao_brain$geneset, panglao_brain$`cell type`)
+```
+
+### Per-cell gene signature enrichments  
+```{r, eval=FALSE}
+seurat_obj <- RunMCA(seurat_obj)
+```
+
+```{r}
+DimPlotMC(seurat_obj, reduction = "mca", group.by = 'orig.ident', features = c("APOE"), as.text = T)
+```
+
+```{r}
+# Performing per-cell hypergeometric tests against the gene signature collection
+HGT_brain_signatures <- RunCellHGT(seurat_obj, pathways = brain_signatures, dims = 1:50, n.features = 200)
+
+# For each cell, assess the signature with the lowest corrected p-value (max -log10 corrected p-value)
+brain_signatures_prediction <- rownames(HGT_brain_signatures)[apply(HGT_brain_signatures, 2, which.max)]
+
+# For each cell, evaluate if the lowest p-value is significant
+brain_signatures_prediction_signif <- ifelse(apply(HGT_brain_signatures, 2, max)>2, yes = brain_signatures_prediction, "unassigned")
+
+# Save cell type predictions as metadata within the Seurat object
+seurat_obj$brain_signatures_prediction <- brain_signatures_prediction_signif
+```
+
+```{r}
+nb <- length(unique(seurat_obj$brain_gs_prediction))
+
+DimPlot(seurat_obj, reduction = "tsne", pt.size = 1, group.by = "brain_signatures_prediction", label.size = 5,cols= c(viridis(nb-1),"gray"))+ NoLegend()
+DimPlot(seurat_obj, reduction = "tsne", pt.size = 1, group.by = "brain_signatures_prediction", label.size = 5,cols= c(viridis(nb-1),"gray"))
+```
+
+# Ontology  
+##  <span style="color:#296d98;"> Parameters </span>  
+```{r}
+enrichR_db = "KEGG_2021_Human"
+nb_maxgenes = 200
+```
+
+**max.genes** = Maximum number of genes to use as input to enrichR.  
+**test.use** = wilcox   
+
+##  enrichR    
+```{r, message=FALSE}
+lapply(
+  levels(seurat_obj[["seurat_clusters"]][[1]]),
+  function(x)DEenrichRPlot(seurat_obj,  ident.1 = x,  max.genes = nb_maxgenes, return.gene.list = FALSE, enrich.database =  enrichR_db)
+)
+```
+
+# Save seurat object  
+```{r}
+saveRDS(seurat_obj, file ="merged_seurat_Clusters_2.rds")
+```
+
+

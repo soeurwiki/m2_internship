@@ -1,0 +1,227 @@
+---
+title: "QC for merged samples [RAW]"
+author: "ATIA Safiya"
+date: "2023-06-26"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages  
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+```
+
+## Load seurat objects  
+```{r}
+path = "../../../"
+
+seurat.BT1_prolif <- readRDS(file = paste0(path, "QC_BT1_prolif.rds"))
+seurat.BT1_diff <- readRDS(file = paste0(path,"QC_BT1_diff.rds"))
+seurat.BT2_prolif <- readRDS(file = paste0(path,"QC_BT2_prolif.rds"))
+seurat.BT2_diff <- readRDS(file = paste0(path,"QC_BT2_diff.rds"))
+seurat.BT54_prolif <- readRDS(file = paste0(path,"QC_BT54_prolif.rds"))
+seurat.BT54_diff <- readRDS(file = paste0(path,"QC_BT54_diff.rds"))
+seurat.BT88_prolif <- readRDS(file = paste0(path,"QC_BT88_prolif.rds"))
+seurat.BT88_diff <- readRDS(file = paste0(path,"QC_BT88_diff.rds"))
+seurat.LGG85_prolif <- readRDS(file = paste0(path,"QC_LGG85_prolif.rds"))
+seurat.LGG85_diff <- readRDS(file = paste0(path,"QC_LGG85_diff.rds"))
+seurat.LGG275_prolif <- readRDS(file = paste0(path,"QC_LGG275_prolif.rds"))
+seurat.LGG275_diff <- readRDS(file = paste0(path,"QC_LGG275_diff.rds"))
+seurat.LGG336_prolif <- readRDS(file = paste0(path,"QC_LGG336_prolif.rds"))
+seurat.LGG336_prolif <- readRDS(file = paste0(path,"QC_LGG336_prolif.rds"))
+seurat.LGG349_prolif <- readRDS(file = paste0(path,"QC_LGG349_prolif.rds"))
+seurat.LGG349_diff <- readRDS(file = paste0(path,"QC_LGG349_diff.rds"))
+```
+
+## Merge all seurat objects  
+```{r}
+seurat_obj <- merge(seurat.BT1_prolif, y = c(seurat.BT1_diff, seurat.BT2_prolif, seurat.BT2_diff ,seurat.BT54_prolif, seurat.BT54_diff, seurat.BT88_prolif, seurat.BT88_diff, 
+    seurat.LGG85_prolif, seurat.LGG85_diff, seurat.LGG275_prolif, seurat.LGG275_diff, seurat.LGG336_prolif, seurat.LGG336_diff, seurat.LGG349_prolif, seurat.LGG349_diff), 
+    add.cell.ids = c("BT1_prolif","BT1_diff", "BT2_prolif", "BT2_diff", "BT54_prolif", "BT54_diff", "BT88_prolif", "BT88_diff", "LGG85_prolif", "LGG85_diff", "LGG275_prolif", "LGG275_diff", "LGG336_prolif", "LGG336_diff", "LGG349_prolif", "LGG349_diff"))
+
+seurat_obj
+```
+
+```{r}
+table(seurat_obj$orig.ident)
+```
+
+### Remove zero counts  
+Remove features without any counts left after the filtering.
+
+```{r}
+counts <- GetAssayData(seurat_obj, assay = "RNA")
+keep.genes <- which(rowSums(counts) != 0 )
+
+seurat_obj <- subset(seurat_obj, features = keep.genes)
+seurat_obj
+```
+
+# QC metrics  
+```{r}
+FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by ="orig.ident")
+FeatureScatter(seurat_obj,feature1 = "nCount_RNA", feature2 = "percent.largest_gene",group.by ="orig.ident")
+
+FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA",group.by ="orig.ident") + geom_smooth(method = 'lm')
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(viridis)
+metadata <- seurat_obj@meta.data
+```
+
+## Nb of reads  
+```{r, message=FALSE}
+VlnPlot(seurat_obj,features="nCount_RNA", group.by = "orig.ident", pt.size = 0)
+RidgePlot(seurat_obj, features = "nCount_RNA", group.by = "orig.ident")
+
+metadata %>% 
+  ggplot(aes( x=nCount_RNA,y=orig.ident, fill= orig.ident)) + 
+	geom_boxplot() + 
+	theme_classic()+
+	scale_fill_viridis(	option="magma",discrete = TRUE, alpha=0.6) +
+  scale_x_log10()
+```
+
+## Nb of genes  
+```{r, message=FALSE}
+VlnPlot(seurat_obj,features="nFeature_RNA", group.by = "orig.ident", pt.size = 0)
+RidgePlot(seurat_obj, features = "nFeature_RNA", group.by = "orig.ident")
+
+metadata %>% 
+  ggplot(aes( x=nFeature_RNA,y=orig.ident, fill= orig.ident)) + 
+	geom_boxplot() + 
+	theme_classic()+
+	scale_fill_viridis(	option="magma",discrete = TRUE, alpha=0.6) +
+  scale_x_log10()
+    
+```
+
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(nFeature_RNA, 
+                  color = "#173664"),
+                  binwidth = 50) + 
+  ggtitle("Distribution of nFeature_RNA ") + NoLegend()
+```
+
+## Gene expression  
+We can pick the first 100 cells and look at the distributions of their expression values.
+
+```{r, warning=FALSE}
+apply(seurat_obj@assays$RNA@data,1,mean) -> gene.expression
+sort(gene.expression, decreasing = TRUE) -> gene.expression
+
+as.tibble(
+  seurat_obj@assays$RNA@data[,1:100]
+) %>%
+  pivot_longer(
+    cols=everything(),
+    names_to="cell",
+    values_to="expression"
+  ) %>%
+  ggplot(aes(x=expression, group=cell)) +
+  geom_density() +
+  coord_cartesian(ylim=c(0,0.6), xlim=c(0,3))
+```
+
+## MT genes  
+```{r, message=FALSE}
+seurat_obj[["percent.mt"]] <- PercentageFeatureSet(seurat_obj, pattern = "^MT-")
+VlnPlot(seurat_obj,features="percent.mt", group.by = "orig.ident", pt.size = 0)
+RidgePlot(seurat_obj, features = "percent.mt", group.by = "orig.ident")
+```
+
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.mt, 
+                  color = "#173664"),
+                  binwidth = 0.5) + 
+  ggtitle("Distribution of Percentage Mitochondrion") + NoLegend()
+```
+
+## Ribosomal genes  
+```{r, message=FALSE}
+PercentageFeatureSet(seurat_obj,pattern="^RP[LS]") -> seurat_obj[["percent.ribosomal"]] 
+VlnPlot(seurat_obj,features="percent.ribosomal", group.by = "orig.ident", pt.size = 0)
+RidgePlot(seurat_obj, features = "percent.ribosomal", group.by = "orig.ident")
+```
+
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.ribosomal, 
+                  color = "#173664"),
+                  binwidth = 0.5) + 
+  ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
+```
+
+## Largest gene  
+```{r, message=FALSE}
+apply(
+  seurat_obj@assays$RNA@counts,
+  2,
+  max
+) -> largest_count
+
+apply(
+  seurat_obj@assays$RNA@counts,
+  2,
+  which.max
+) -> largest_index
+
+rownames(seurat_obj)[largest_index] -> seurat_obj$largest_gene
+
+100 * largest_count / seurat_obj$nCount_RNA -> seurat_obj$percent.largest_gene
+
+VlnPlot(seurat_obj,features="percent.largest_gene", group.by = "orig.ident", pt.size = 0)
+RidgePlot(seurat_obj, features = "percent.largest_gene", group.by = "orig.ident")
+```
+
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.largest_gene, 
+                  color = "#173664"),
+                  binwidth = 0.7) + 
+  ggtitle("Distribution of Percentage Largest Gene") + NoLegend()
+```
+
+## Cell cycle scoring  
+```{r, warning=FALSE}
+seurat_obj <- CellCycleScoring(seurat_obj, s.features = cc.genes.updated.2019$s.genes, g2m.features = cc.genes.updated.2019$g2m.genes, set.ident = TRUE)
+
+seurat_obj@meta.data %>%
+  group_by(orig.ident,Phase) %>%
+  count() %>%
+  group_by(orig.ident) %>%
+  mutate(percent=100*n/sum(n)) %>%
+  ungroup() %>%
+  ggplot(aes(x=orig.ident,y=percent, fill=Phase)) +
+  scale_fill_manual( values=c(G1='azure4',G2M='dodgerblue',S='tomato3' )) +
+  geom_col() +
+  ggtitle("Percentage of cell cycle phases per sample")
+
+as_tibble(seurat_obj[[]]) %>%
+  ggplot(aes(Phase, fill=Phase)) +
+  scale_fill_manual( values=c(G1='azure4',G2M='dodgerblue',S='tomato3' ))+ geom_bar()
+
+
+as_tibble(seurat_obj[[]]) %>%
+  ggplot(aes(x=S.Score, y=G2M.Score, color=Phase)) + 
+  scale_color_manual( values=c(G1='azure4',G2M='dodgerblue',S='tomato3' )) +
+  geom_point() +
+  coord_cartesian(xlim=c(-0.15,0.15), ylim=c(-0.15,0.15))
+```
+
+# Save Seurat object  
+```{r}
+saveRDS(seurat_obj, file ="Raw_merged_seurat.rds")
+```

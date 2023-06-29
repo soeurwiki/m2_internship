@@ -1,0 +1,232 @@
+---
+title: "QC for one sample"
+author: "ATIA Safiya"
+date: "2023-06-26"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Environment  
+## Load required packages  
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+```
+
+```{r,  message=FALSE, warning=FALSE}
+path <- "../../../Cellranger/LGG85_prolif/"
+project <- "LGG85_prolif"
+```
+
+# Loading data  
+```{r}
+mtx_obj <- Seurat::ReadMtx(mtx = paste(path,"matrix.mtx.gz",sep = ""), 
+                           cells = paste(path,"barcodes.tsv.gz",sep = ""),
+                           features = paste(path,"features.tsv.gz",sep = ""))
+
+seurat_obj <- CreateSeuratObject(counts = mtx_obj,
+                                        min.cells = 3, min.features = 200,
+                                        project = project)
+                
+seurat_obj                    
+```
+
+*min.cells* : Include features detected in at least this many cells. Will subset the counts matrix as well.  
+*min.features* = Include cells where at least this many features are detected.
+
+# QC metrics  
+**nCount_RNA** : the total number of reads (or more correctly UMIs) in the dataset  
+**nFeature_RNA** : the number of observed genes (anything with a nonzero count)
+
+## MT genes  
+Single cell datasets can be filled with large numbers of reads coming from mitochondria. These often indicate a sick cell undergoing apoptosis.
+
+```{r}
+seurat_obj[["percent.mt"]] <- PercentageFeatureSet(seurat_obj, pattern = "^MT-")
+```
+
+## Ribosomal genes  
+Ribosomal genes also tend to be very highly represented, and can vary between cell types, so it can be instructive to see how prevalent they are in the data. These are ribosomal protein genes rather than the actual rRNA, so they’re more a measure of the translational activity of the cell rather than the cleanliness of the polyA selection.
+
+```{r}
+PercentageFeatureSet(seurat_obj,pattern="^RP[LS]") -> seurat_obj[["percent.ribosomal"]] 
+```
+
+## Largest gene  
+what percentage of the data comes from the single most observed gene?
+
+Again, having a high proportion of your data dominated by a single gene is a metric which could either give biological context or indicate a technical problem, depending on what the gene is.
+
+```{r}
+apply(
+  seurat_obj@assays$RNA@counts,
+  2,
+  max
+) -> largest_count
+
+apply(
+  seurat_obj@assays$RNA@counts,
+  2,
+  which.max
+) -> largest_index
+
+rownames(seurat_obj)[largest_index] -> seurat_obj$largest_gene
+
+100 * largest_count / seurat_obj$nCount_RNA -> seurat_obj$percent.largest_gene
+```
+
+## Plots  
+```{r}
+VlnPlot(seurat_obj, features=c("nFeature_RNA","nCount_RNA"), ncol = 2, pt.size = 0)
+VlnPlot(seurat_obj, features=c("percent.mt", "percent.ribosomal", "percent.largest_gene"), ncol = 3, pt.size = 0)
+FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "percent.mt")
+FeatureScatter(seurat_obj,feature1 = "nCount_RNA", feature2 = "percent.largest_gene")
+```
+
+```{r}
+FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA") + geom_smooth(method = 'lm')
+```
+
+A good datatset should follow the line.
+
+# Filtering  
+##  <span style="color:#296d98;"> qc metrics </span>  
+```{r, warning=FALSE}
+as_tibble(
+  seurat_obj[[]],
+  rownames="Cell.Barcode"
+) -> qc.metrics
+
+raw_counts <- qc.metrics[, c("Cell.Barcode","nCount_RNA")]
+head(qc.metrics)
+```
+
+```{r}
+## Boxplots of gene count distributions per sample  (non-normalized log2(counts) per sample.)
+
+count.table <- txi$counts
+epsilon <- 1 # pseudo-count to avoid problems with log(0)
+boxplot(log2(count.table + epsilon), col=expdes$genotype, pch=".", 
+        horizontal=TRUE, cex.axis=0.5,
+        las=1, ylab="Samples", xlab="log2(Counts +1)")
+```
+
+```{r}
+x1 = 3000
+x2 = 9000
+
+ggplot(qc.metrics) + 
+   geom_histogram(aes(nFeature_RNA, 
+                  color = ifelse(nFeature_RNA < x1 |  nFeature_RNA > x2 , "a", "b")),
+                  binwidth = 50) + 
+  scale_color_manual(values = c("a" = "#558bdc", "b" = "#173664")) +
+  ggtitle("Distribution of nFeature_RNA ") + NoLegend()
+```
+
+Low-quality cells or empty droplets will often have very few genes.  
+Cell doublets or multiplets may exhibit an aberrantly high gene count.
+
+```{r}
+x3 = 20
+
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.mt, 
+                  color = ifelse(percent.mt < x3 , "a", "b")),
+                  binwidth = 0.5) + 
+  scale_color_manual(values = c("a" = "#173664", "b" = "#558bdc")) + 
+  ggtitle("Distribution of Percentage Mitochondrion") + NoLegend()
+```
+
+This metric can identify whether there is a large amount of mitochondrial contamination from dead or dying cells. We define poor quality samples for mitochondrial counts as cells which surpass the 20 mitochondrial ratio mark (unless it is expected in the sample).
+
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.ribosomal, 
+                  color = "#173664"),
+                  binwidth = 0.5) + 
+  ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
+```
+
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.largest_gene, 
+                  color = "#173664"),
+                  binwidth = 0.7) + 
+  ggtitle("Distribution of Percentage Largest Gene") + NoLegend()
+```
+
+```{r}
+subset(
+  seurat_obj,
+  nFeature_RNA> x1 & 
+    nFeature_RNA < x2 & 
+    percent.mt < x3 ) -> data
+
+data
+```
+
+## After filtering  
+```{r}
+FeatureScatter(data, feature1 = "nCount_RNA", feature2 = "nFeature_RNA") + geom_smooth(method = 'lm')
+```
+
+```{r, warning=FALSE}
+as_tibble(
+  data[[]],
+  rownames="Cell.Barcode"
+) -> qc.metrics
+```
+
+```{r}
+library(viridis)
+raw_counts$filtered <- NA
+raw_counts[rownames(qc.metrics),"filtered"] <- qc.metrics[,"nCount_RNA"]
+epsilon <- 1 # pseudo-count to avoid problems with log(0)
+boxplot(log2(raw_counts[,c("nCount_RNA","filtered")] + epsilon), pch=".", 
+        horizontal=TRUE, cex.axis=0.5,
+        las=1, ylab="Raw counts (befor & after filtering)", xlab="log2(Counts +1)", col=viridis(5, alpha=0.6, direction = 1))
+
+```
+
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(nFeature_RNA, 
+                  color = "#173664"),
+                  binwidth = 50) + 
+  ggtitle("Distribution of nFeature_RNA ") + NoLegend()
+```
+
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.mt, 
+                  color = "#173664"),
+                  binwidth = 0.5) + 
+  ggtitle("Distribution of Percentage Mitochondrion") + NoLegend()
+```
+
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.ribosomal, 
+                  color = "#173664"),
+                  binwidth = 0.5) + 
+  ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
+```
+
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.largest_gene, 
+                  color = "#173664"),
+                  binwidth = 0.7) + 
+  ggtitle("Distribution of Percentage Largest Gene") + NoLegend()
+```
+
+# Save seurat object  
+```{r}
+saveRDS(data, file =paste0("QC_",project,".rds"))
+```
