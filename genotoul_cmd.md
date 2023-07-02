@@ -8,7 +8,7 @@ srun --pty bash
 squeue -u satia
 ```
 
-##### nb coeurs
+##### nb threads
 ```
 cat /proc/cpuinfo | grep processor | wc -l 
 ```
@@ -35,5 +35,5 @@ squeue -u satia | awk '{print $1}' | tail -n+2 | xargs scancel
 
 ##### copy files to cluster
 ```
-scp -r satia@genologin.toulouse.inra.fr:/work/satia/folder/ .
+scp -r satia@genologin.toulouse.inra.fr:/work/satia/your_folder/ .
 ```
