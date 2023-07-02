@@ -28,36 +28,44 @@ library(ggpubr) #for plotting
 library("viridis")
 ```
 
-## Load seurat object (NORM)
+## Load seurat object (ALL GENES)
 ```{r}
-seurat_obj <- readRDS(file = "merged_seurat_FindNeighbors.rds")
+seurat_obj <- readRDS(file = "merged_seurat_Clusters.rds")
 
 seurat_obj
 table(seurat_obj$orig.ident)
 ```
 
+## Load seurat object (METABO)
+```{r}
+metabo_obj <- readRDS(file = "merged_seurat_FindNeighbors_metabo.rds")
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
 ## <span style="color:#296d98;"> Parameters </span>  
 ```{r}
 res = 0.5
+cluster_colors = c("#f8766d", "#e38900","#c49a00","#99a800","#53b400","#00bc56","#00c094","#00bfc4","#00b6eb","#06a4ff","#a58aff","#df70f8","#fb61d7","#ff66a8")
 ```
 
 # Defining cell clusters  
-## Optimize resolution  
+## Plot clusters  
 ```{r, message=FALSE}
-seurat_obj <- FindClusters(seurat_obj, resolution = res)
-```
-
-## Plot clusters
-```{r}
-DimPlot(seurat_obj, reduction = "pca", label = TRUE, group.by = "seurat_clusters") + ggtitle("PC1 vs PC2 with Clusters")
+metabo_obj <- FindClusters(metabo_obj, resolution = res)
 ```
 
 ```{r}
-DimPlot(seurat_obj, reduction = "umap", pt.size = 1, label.size = 7, label = TRUE, group.by = "seurat_clusters")
+DimPlot(metabo_obj, reduction = "pca", label = TRUE, group.by = "seurat_clusters") + ggtitle("PC1 vs PC2 with Clusters")
 ```
 
 ```{r}
-DimPlot(seurat_obj, reduction = "tsne", pt.size = 1, label.size = 7, label = TRUE, group.by = "seurat_clusters")
+DimPlot(metabo_obj, reduction = "umap", pt.size = 1, label.size = 7, label = TRUE, group.by = "seurat_clusters")
+```
+
+```{r}
+DimPlot(metabo_obj, reduction = "tsne", pt.size = 1, label.size = 7, label = TRUE, group.by = "seurat_clusters")
 ```
 
 ## QC metrics  
@@ -65,37 +73,37 @@ Now that we have our clusters, we can look to see if they are being influenced b
 
 ### Nb of reads  
 ```{r, message=FALSE}
-VlnPlot(seurat_obj, features="nCount_RNA", group.by = "seurat_clusters", pt.size = 0)
-RidgePlot(seurat_obj, features = "nCount_RNA", group.by = "seurat_clusters")
+VlnPlot(metabo_obj, features="nCount_RNA", group.by = "seurat_clusters", pt.size = 0)
+RidgePlot(metabo_obj, features = "nCount_RNA", group.by = "seurat_clusters")
 ```
 
 ### Nb of genes    
 ```{r, message=FALSE}
-VlnPlot(seurat_obj, features="nFeature_RNA", group.by = "seurat_clusters", pt.size = 0)
-RidgePlot(seurat_obj, features = "nFeature_RNA", group.by = "seurat_clusters")
+VlnPlot(metabo_obj, features="nFeature_RNA", group.by = "seurat_clusters", pt.size = 0)
+RidgePlot(metabo_obj, features = "nFeature_RNA", group.by = "seurat_clusters")
 ```
 
 ### MT genes  
 ```{r, message=FALSE}
-VlnPlot(seurat_obj, features = "percent.mt", group.by = "seurat_clusters", pt.size = 0)
-RidgePlot(seurat_obj, features = "percent.mt", group.by = "seurat_clusters")
+VlnPlot(metabo_obj, features = "percent.mt", group.by = "seurat_clusters", pt.size = 0)
+RidgePlot(metabo_obj, features = "percent.mt", group.by = "seurat_clusters")
 ```
 
 ### Ribosomal genes  
 ```{r, message=FALSE}
-VlnPlot(seurat_obj, features = "percent.ribosomal", group.by = "seurat_clusters", pt.size = 0)
-RidgePlot(seurat_obj, features = "percent.ribosomal", group.by = "seurat_clusters")
+VlnPlot(metabo_obj, features = "percent.ribosomal", group.by = "seurat_clusters", pt.size = 0)
+RidgePlot(metabo_obj, features = "percent.ribosomal", group.by = "seurat_clusters")
 ```
 
 ### Largest gene  
 ```{r, message=FALSE}
-VlnPlot(seurat_obj, features = "percent.largest_gene", group.by = "seurat_clusters", pt.size = 0)
-RidgePlot(seurat_obj, features = "percent.largest_gene", group.by = "seurat_clusters")
+VlnPlot(metabo_obj, features = "percent.largest_gene", group.by = "seurat_clusters", pt.size = 0)
+RidgePlot(metabo_obj, features = "percent.largest_gene", group.by = "seurat_clusters")
 ```
 
 ```{r}
 # which largest gene
-seurat_obj[[]] %>%
+metabo_obj[[]] %>%
   group_by(seurat_clusters, largest_gene) %>%
   count() %>%
   arrange(desc(n)) %>%
@@ -107,7 +115,7 @@ seurat_obj[[]] %>%
 
 ### Cell cycle  
 ```{r}
-seurat_obj@meta.data %>%
+metabo_obj@meta.data %>%
   group_by(seurat_clusters,Phase) %>%
   count() %>%
   group_by(seurat_clusters) %>%
@@ -116,6 +124,40 @@ seurat_obj@meta.data %>%
   ggplot(aes(x=seurat_clusters,y=percent, fill=Phase)) +
   geom_col() +
   ggtitle("Percentage of cell cycle phases per cluster")
+```
+## Comparison with all genes
+Coloring metabo clusters on all genes plots (to see in which cluster the cells are going to be associated with the metabo genes only)  
+
+```{r}
+seurat_obj$metabo_clusters = metabo_obj$seurat_clusters
+
+DimPlot(seurat_obj, group.by= 'metabo_clusters', label = TRUE, label.size = 5, reduction = "tsne")
+DimPlot(seurat_obj, group.by= 'metabo_clusters', label = TRUE, label.size = 5, reduction = "umap")
+```
+
+```{r, warning=FALSE}
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  metabo_cluster = seurat_obj$metabo_clusters,
+) %>%
+  group_by(cluster,metabo_cluster) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=metabo_cluster)) +
+  scale_fill_manual(values=cluster_colors)+
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
 ```
 
 # Finding markers for each cluster  
@@ -129,8 +171,8 @@ Identify genes whose expression defines each cluster which has been identified.
 ```{r}
 # This loop just runs the FindMarkers function on all of the clusters
 lapply(
-  levels(seurat_obj[["seurat_clusters"]][[1]]),
-  function(x)FindMarkers(seurat_obj,ident.1 = x, min.pct = 0.25)
+  levels(metabo_obj[["seurat_clusters"]][[1]]),
+  function(x)FindMarkers(metabo_obj,ident.1 = x, min.pct = 0.25)
 ) -> cluster.markers
 
 
@@ -161,7 +203,7 @@ We can try to clean this up for any individual cluster by using the **roc analys
 ```{r, eval=FALSE}
 # here it's a comparison between cluster 0 and 2.
 # best positive hit = more expressed in cluster 0.
-FindMarkers(seurat_obj, ident.1 = 0, ident.2 = 2, test.use = "roc", only.pos = TRUE)
+FindMarkers(metabo_obj, ident.1 = 0, ident.2 = 2, test.use = "roc", only.pos = TRUE)
 ```
 
 ## Cluster biomarkers  
@@ -169,15 +211,15 @@ FindMarkers(seurat_obj, ident.1 = 0, ident.2 = 2, test.use = "roc", only.pos = T
 
 ```{r, warning=FALSE, message=FALSE}
 # find markers for every cluster compared to all remaining cells, report only the positive ones
-markers <- FindAllMarkers(seurat_obj, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+markers <- FindAllMarkers(metabo_obj, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 ```
 
 ```{r}
 top <- markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_log2FC)
-DoHeatmap(seurat_obj, features = top$gene) + NoLegend()
+DoHeatmap(metabo_obj, features = top$gene) + NoLegend()
 ```
 
 # Save seurat object  
 ```{r}
-saveRDS(seurat_obj, file ="merged_seurat_Markers.rds")
+saveRDS(metabo_obj, file ="merged_seurat_Markers_metabo.rds")
 ```

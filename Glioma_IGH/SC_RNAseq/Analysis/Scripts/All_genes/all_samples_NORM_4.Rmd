@@ -24,6 +24,7 @@ library('enrichR')
 ## annotation
 library(CelliD)
 library(ggpubr) #for plotting
+library("SCINA")
 
 library("viridis")
 ```
@@ -145,7 +146,7 @@ lapply(
 
 # Save seurat object  
 ```{r}
-saveRDS(seurat_obj, file ="merged_seurat_Clusters_2.rds")
+saveRDS(seurat_obj, file ="merged_seurat_Clusters.rds")
 ```
 
 

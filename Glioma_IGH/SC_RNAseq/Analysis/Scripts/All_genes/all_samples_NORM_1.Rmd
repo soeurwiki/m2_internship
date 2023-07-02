@@ -19,11 +19,12 @@ library(Seurat)
 library(tidyverse)
 library(ggplot2)
 library(sctransform)
+library("scales")
 ```
 
 ## Load seurat object (RAW)  
 ```{r}
-seurat_obj <- readRDS(file = "Raw_merged_seurat.rds")
+seurat_obj <- readRDS(file = "sctransform.rds")
 
 seurat_obj
 table(seurat_obj$orig.ident)
@@ -39,11 +40,6 @@ During normalization, we can also remove confounding sources of variation, for e
 seurat_obj <- SCTransform(seurat_obj, method = "glmGamPoi", vst.flavor = "v2", verbose = FALSE)
 ```
 *method = "glmGamPoi"  improves the speed of the learning procedure*
-
-```{r, echo=FALSE}
-seurat_obj <- readRDS("sctransform.rds")
-seurat_obj
-```
 
 ```{r, warning=FALSE}
 tibble(
@@ -78,7 +74,6 @@ metadata %>%
   ggplot(aes( x=nCount_RNA,y=orig.ident, fill= orig.ident)) + 
 	geom_boxplot() + 
 	theme_classic()+
-	scale_fill_viridis(	option="magma",discrete = TRUE, alpha=0.6) +
   scale_x_log10()
 ```
 
@@ -91,7 +86,6 @@ metadata %>%
   ggplot(aes( x=nFeature_RNA,y=orig.ident, fill= orig.ident)) + 
 	geom_boxplot() + 
 	theme_classic()+
-	scale_fill_viridis(	option="magma",discrete = TRUE, alpha=0.6) +
   scale_x_log10()
     
 ```
@@ -148,10 +142,10 @@ RidgePlot(seurat_obj, features = "percent.ribosomal", group.by = "orig.ident")
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.largest_gene, 
+   geom_histogram(aes(percent.ribosomal, 
                   color = "#173664"),
                   binwidth = 0.7) + 
-  ggtitle("Distribution of Percentage Largest Gene") + NoLegend()
+  ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
 ```
 
 ## Largest gene  
@@ -216,20 +210,20 @@ as_tibble(seurat_obj[[]]) %>%
 
 ```{r}
 # identify the 10 most highly variable genes
-top10 <- head(VariableFeatures(metabo_obj), 10)
+top10 <- head(VariableFeatures(seurat_obj), 10)
 
 # plot the variable features 
-plot <- VariableFeaturePlot(metabo_obj)
+plot <- VariableFeaturePlot(seurat_obj)
 LabelPoints(plot = plot, points = head(top10,10), repel = TRUE)
 ```
 
 We can plot out a graph of the variance vs mean and highlight the selected genes so we can see whether we think we’re likely to capture what we need.    
 
 ```{r}
-as_tibble(HVFInfo(metabo_obj),rownames = "Gene") -> variance.data
+as_tibble(HVFInfo(seurat_obj),rownames = "Gene") -> variance.data
 
 variance.data %>% 
-  mutate(hypervariable=Gene %in% VariableFeatures(metabo_obj)
+  mutate(hypervariable=Gene %in% VariableFeatures(seurat_obj)
 ) -> variance.data
 
 variance.data %>% 
@@ -251,14 +245,31 @@ variance.data %>%
 # Linear dimensional reduction  
 ## PCA  
 ```{r}
-metabo_obj <- RunPCA(metabo_obj, features = VariableFeatures(object = metabo_obj))
-VizDimLoadings(metabo_obj, dims = 1:2, reduction = "pca")
+seurat_obj <- RunPCA(seurat_obj, features = VariableFeatures(object = seurat_obj))
+VizDimLoadings(seurat_obj, dims = 1:2, reduction = "pca")
+```
+```{r}
+seurat_obj <- RunPCA(seurat_obj, features = VariableFeatures(object = seurat_obj))
+VizDimLoadings(seurat_obj, dims = 1:2, reduction = "pca")
+```
+```{r}
+mat <- Seurat::GetAssayData(seurat_obj, assay = "RNA", slot = "scale.data")
+pca <- seurat_obj[["pca"]]
+
+# Get the total variance:
+total_variance <- sum(matrixStats::rowVars(mat))
+eigValues = (pca@stdev)^2  ## EigenValues
+
+varExplained = eigValues / total_variance
+
+pc1 = percent(varExplained[1], accuracy = 0.01)
+pc2 = percent(varExplained[2], accuracy = 0.01)
 ```
 
 ```{r}
-DimPlot(metabo_obj, reduction = "pca", group.by = "orig.ident")
-DimPlot(metabo_obj, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue',S='tomato3'))
-DimPlot(metabo_obj, reduction = "pca", group.by = "largest_gene", label = TRUE, label.size = 3) + NoLegend()
+DimPlot(seurat_obj, reduction = "pca", group.by = "orig.ident") + xlab(paste0("PC_1 : ", pc1)) + ylab(paste0("PC_2 : pc2 ))
+DimPlot(seurat_obj, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue',S='tomato3'))
+DimPlot(seurat_obj, reduction = "pca", group.by = "largest_gene", label = TRUE, label.size = 3) + NoLegend()
 ```
 
 ### Save seurat object  
@@ -281,11 +292,11 @@ how many components should we choose to include?
 ranking of principle components based on the percentage of variance explained by each one 
 
 ```{r, eval=FALSE}
-metabo_obj <- JackStraw(metabo_obj, num.replicate = 100, dims = 40)
-jack.data <- metabo_obj 
+seurat_obj <- JackStraw(seurat_obj, num.replicate = 100, dims = 40)
+jack.data <- seurat_obj 
 
-metabo_obj <- ScoreJackStraw(metabo_obj, dims = 1:40)
+seurat_obj <- ScoreJackStraw(seurat_obj, dims = 1:40)
 
-JackStrawPlot(metabo_obj, dims = 1:40)
-ElbowPlot(metabo_obj, ndims = 40)
+JackStrawPlot(seurat_obj, dims = 1:40)
+ElbowPlot(seurat_obj, ndims = 40)
 ```
