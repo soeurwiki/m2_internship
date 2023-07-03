@@ -45,6 +45,7 @@ res = 0.5
 ## Optimize resolution  
 ```{r, message=FALSE}
 seurat_obj <- FindClusters(seurat_obj, resolution = res)
+levels(seurat_obj$seurat_clusters)
 ```
 
 ## Plot clusters

@@ -12,7 +12,7 @@ output:
     theme: lumen
 ---
 
-# Environment  
+# Seurat objects  
 ## Load required packages  
 ```{r,  message=FALSE, warning=FALSE}
 library(Seurat)

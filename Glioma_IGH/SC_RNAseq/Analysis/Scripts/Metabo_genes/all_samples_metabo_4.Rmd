@@ -1,5 +1,5 @@
 ---
-title: "Clusters annotations for merged samples [Normalized]"
+title: "METABO -- Clusters annotations for merged samples"
 author: "ATIA Safiya"
 date: "2023-06-26"
 output:
@@ -31,8 +31,15 @@ library("SCINA")
 library("viridis")
 ```
 
-## Load seurat object (NORM)
+## Load seurat object (ALL GENES)
+```{r}
+seurat_obj <- readRDS(file = "merged_seurat_Clusters.rds")
 
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+## Load seurat object (METABO)
 ```{r}
 metabo_obj <- readRDS(file = "merged_seurat_Mca_metabo.rds")
 
@@ -150,17 +157,22 @@ DimPlot(metabo.object,reduction = "tsne", pt.size = 1, group.by = "scina_labels"
 
 ```
 
-# Ontology HHHHHHHHHHHHHHHHHHHH
-
+# Ontology  
 **max.genes** = Maximum number of genes to use as input to enrichR.\
 **test.use** = wilcox
 
-## enrichR
+## enrichR  
+Returns enriched and depleted barplots with the top enriched/depleted GO terms from EnrichR. (calculated with all genes but based on metabo clusters)  
+```{r, message=FALSE}
+## change all genes clusters to metabo clusters
+enrich_obj <- seurat_obj
+enrich_obj$seurat_clusters <- metabo_obj$seurat_clusters
+```
 
 ```{r, message=FALSE}
 lapply(
-  levels(metabo_obj[["seurat_clusters"]][[1]]),
-  function(x)DEenrichRPlot(metabo_obj,  ident.1 = x,  max.genes = nb_maxgenes, return.gene.list = FALSE, enrich.database =  enrichR_db)
+  levels(enrich_obj$seurat_clusters),
+  function(x)DEenrichRPlot(enrich_obj,  ident.1 = x,  max.genes = nb_maxgenes, return.gene.list = FALSE, enrich.database =  enrichR_db)
 )
 ```
 

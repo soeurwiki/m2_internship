@@ -1,0 +1,17 @@
+sample,fastq_1,fastq_2,strandedness
+BT1_noGF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT1_noGF/BT1_noGF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT1_noGF/BT1_noGF_2.fq.gz,auto
+BT1_GF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT1_GF/BT1_GF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT1_GF/BT1_GF_2.fq.gz,auto
+BT2_noGF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT2_noGF/BT2_noGF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT2_noGF/BT2_noGF_2.fq.gz,auto
+BT2_GF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT2_GF/BT2_GF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT2_GF/BT2_GF_2.fq.gz,auto
+BT54_noGF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT54_noGF/BT54_noGF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT54_noGF/BT54_noGF_2.fq.gz,auto
+BT54_GF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT54_GF/BT54_GF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT54_GF/BT54_GF_2.fq.gz,auto
+BT88_noGF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT88_noGF/BT88_noGF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT88_noGF/BT88_noGF_2.fq.gz,auto
+BT88_GF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT88_GF/BT88_GF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/BT88_GF/BT88_GF_2.fq.gz,auto
+LGG275_noGF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG275_noGF/LGG275_noGF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG275_noGF/LGG275_noGF_2.fq.gz,auto
+LGG275_GF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG275_GF/LGG275_GF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG275_GF/LGG275_GF_2.fq.gz,auto
+LGG336_noGF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG336_noGF/LGG336_noGF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG336_noGF/LGG336_noGF_2.fq.gz,auto
+LGG336_GF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG336_GF/LGG336_GF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG336_GF/LGG336_GF_2.fq.gz,auto
+LGG349_noGF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG349_noGF/LGG349_noGF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG349_noGF/LGG349_noGF_2.fq.gz,auto
+LGG349_GF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG349_GF/LGG349_GF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG349_GF/LGG349_GF_2.fq.gz,auto
+LGG85_noGF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG85_noGF/LGG85_noGF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG85_noGF/LGG85_noGF_2.fq.gz,auto
+LGG85_GF,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG85_GF/LGG85_GF_1.fq.gz,/work/project/LeCam_U1194/SAFIYA/Data_Gliome/BULK/LGG85_GF/LGG85_GF_2.fq.gz,auto

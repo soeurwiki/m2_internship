@@ -47,7 +47,7 @@ source ./Processing/run_pipeline.sh
 -   Run `all_samples_metabo_2.Rmd`
     -   **Modify** the number of pc (**/!\\** as sctransform is used, you can use more pc than needed, even recommended)
     -   **Modify** the number of thread available (default: 8)
--   Run `all_samples_NORM_3.Rmd`
+-   Run `all_samples_metabo_3.Rmd` *run it on notebook format to adapt cluster_colors*
     -   **Modify** `cluster_colors` (metabo)
     -   **Modify** the resolution to define clusters. (default: 0.5)
 -   Run `mca.sh`

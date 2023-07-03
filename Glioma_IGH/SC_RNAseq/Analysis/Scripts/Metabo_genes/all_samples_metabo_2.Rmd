@@ -1,5 +1,5 @@
 ---
-title: "Defining clusters for merged samples [Normalized]"
+title: "METABO -- Defining clusters for merged samples"
 author: "ATIA Safiya"
 date: "2023-06-26"
 output:
@@ -44,7 +44,7 @@ thread = 8
 metabo_obj <- RunUMAP(metabo_obj, dims = 1:pc, seed.use = saved.seed, )
 
 DimPlot(metabo_obj, reduction = "umap", group.by = "orig.ident")
-DimPlot(metabo_obj, reduction = "umap", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue',S='tomato3') )
+DimPlot(metabo_obj, reduction = "umap", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3') )
 ```
 
 ## tSNE
@@ -53,7 +53,7 @@ tSNE with default Perplexity 30 :
 metabo_obj <- RunTSNE(metabo_obj, dims=1:pc,seed.use = saved.seed)
 
 DimPlot(metabo_obj, reduction = "tsne", group.by = "orig.ident")
-DimPlot(metabo_obj, reduction = "tsne", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue',S='tomato3'))
+DimPlot(metabo_obj, reduction = "tsne", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3'))
 ```
 
 # Defining cell clusters  

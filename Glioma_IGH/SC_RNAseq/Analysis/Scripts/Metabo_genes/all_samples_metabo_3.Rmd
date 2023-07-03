@@ -1,5 +1,5 @@
 ---
-title: "QC & Markers of clusters for merged samples [Normalized]"
+title: "METABO -- QC & Markers of clusters for merged samples"
 author: "ATIA Safiya"
 date: "2023-06-26"
 output:
@@ -54,6 +54,7 @@ cluster_colors = c("#f8766d", "#e38900","#c49a00","#99a800","#53b400","#00bc56",
 ## Plot clusters  
 ```{r, message=FALSE}
 metabo_obj <- FindClusters(metabo_obj, resolution = res)
+levels(metabo_obj$seurat_clusters)
 ```
 
 ```{r}
@@ -125,6 +126,7 @@ metabo_obj@meta.data %>%
   geom_col() +
   ggtitle("Percentage of cell cycle phases per cluster")
 ```
+
 ## Comparison with all genes
 Coloring metabo clusters on all genes plots (to see in which cluster the cells are going to be associated with the metabo genes only)  
 

@@ -44,7 +44,7 @@ thread = 8
 seurat_obj <- RunUMAP(seurat_obj, dims = 1:pc, seed.use = saved.seed, )
 
 DimPlot(metabo_obj, reduction = "umap", group.by = "orig.ident")
-DimPlot(metabo_obj, reduction = "umap", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue',S='tomato3') )
+DimPlot(metabo_obj, reduction = "umap", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3') )
 ```
 
 ## tSNE
@@ -53,7 +53,7 @@ tSNE with default Perplexity 30 :
 seurat_obj <- RunTSNE(seurat_obj, dims=1:pc,seed.use = saved.seed)
 
 DimPlot(metabo_obj, reduction = "tsne", group.by = "orig.ident")
-DimPlot(metabo_obj, reduction = "tsne", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue',S='tomato3'))
+DimPlot(metabo_obj, reduction = "tsne", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3'))
 ```
 
 # Defining cell clusters  
