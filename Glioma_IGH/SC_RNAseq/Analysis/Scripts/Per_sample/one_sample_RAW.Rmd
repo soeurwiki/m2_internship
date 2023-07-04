@@ -17,10 +17,11 @@ output:
 ```{r,  message=FALSE, warning=FALSE}
 library(Seurat)
 library(tidyverse)
+library(viridis)
 ```
 
 ```{r,  message=FALSE, warning=FALSE}
-path <- "../../../Cellranger/LGG85_prolif/"
+path <- "../samples/LGG85_prolif/"
 project <- "LGG85_prolif"
 ```
 
@@ -147,16 +148,16 @@ This metric can identify whether there is a large amount of mitochondrial contam
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.ribosomal, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.ribosomal), 
+                  color = "#173664", fill= "#558bdc",
                   binwidth = 0.5) + 
   ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
 ```
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.largest_gene, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.largest_gene), 
+                  color = "#173664", fill= "#558bdc",
                   binwidth = 0.7) + 
   ggtitle("Distribution of Percentage Largest Gene") + NoLegend()
 ```
@@ -184,44 +185,43 @@ as_tibble(
 ```
 
 ```{r}
-library(viridis)
 raw_counts$filtered <- NA
 raw_counts[rownames(qc.metrics),"filtered"] <- qc.metrics[,"nCount_RNA"]
 epsilon <- 1 # pseudo-count to avoid problems with log(0)
 boxplot(log2(raw_counts[,c("nCount_RNA","filtered")] + epsilon), pch=".", 
         horizontal=TRUE, cex.axis=0.5,
-        las=1, ylab="Raw counts (befor & after filtering)", xlab="log2(Counts +1)", col=viridis(5, alpha=0.6, direction = 1))
+        las=1, ylab="Raw counts (before & after filtering)", xlab="log2(Counts +1)", col=viridis(5, alpha=0.6, direction = 1))
 
 ```
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(nFeature_RNA, 
-                  color = "#173664"),
+   geom_histogram(aes(nFeature_RNA), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 50) + 
   ggtitle("Distribution of nFeature_RNA ") + NoLegend()
 ```
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.mt, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.mt), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 0.5) + 
   ggtitle("Distribution of Percentage Mitochondrion") + NoLegend()
 ```
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.ribosomal, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.ribosomal), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 0.5) + 
   ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
 ```
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.largest_gene, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.largest_gene), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 0.7) + 
   ggtitle("Distribution of Percentage Largest Gene") + NoLegend()
 ```

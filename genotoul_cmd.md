@@ -41,5 +41,5 @@ scp -r satia@genologin.toulouse.inra.fr:/work/satia/your_folder/ .
 ##### run Rmd scripts  
 ```
 module load system/R-4.2.3_Miniconda3
-Rscript -e "rmarkdown::render('example.Rmd’)
+Rscript -e "rmarkdown::render('example.Rmd')
 ```

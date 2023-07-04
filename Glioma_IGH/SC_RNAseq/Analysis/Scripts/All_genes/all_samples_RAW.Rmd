@@ -67,15 +67,7 @@ seurat_obj
 ```
 
 # QC metrics  
-```{r}
-FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by ="orig.ident")
-FeatureScatter(seurat_obj,feature1 = "nCount_RNA", feature2 = "percent.largest_gene",group.by ="orig.ident")
-
-FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA",group.by ="orig.ident") + geom_smooth(method = 'lm')
-```
-
 ```{r, message=FALSE, warning=FALSE}
-library(viridis)
 metadata <- seurat_obj@meta.data
 ```
 
@@ -88,7 +80,6 @@ metadata %>%
   ggplot(aes( x=nCount_RNA,y=orig.ident, fill= orig.ident)) + 
 	geom_boxplot() + 
 	theme_classic()+
-	scale_fill_viridis(	option="magma",discrete = TRUE, alpha=0.6) +
   scale_x_log10()
 ```
 
@@ -101,7 +92,6 @@ metadata %>%
   ggplot(aes( x=nFeature_RNA,y=orig.ident, fill= orig.ident)) + 
 	geom_boxplot() + 
 	theme_classic()+
-	scale_fill_viridis(	option="magma",discrete = TRUE, alpha=0.6) +
   scale_x_log10()
     
 ```
@@ -192,6 +182,14 @@ ggplot(qc.metrics) +
                   color = "#173664"),
                   binwidth = 0.7) + 
   ggtitle("Distribution of Percentage Largest Gene") + NoLegend()
+```
+
+## FeatureScatter  
+```{r}
+FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by ="orig.ident")
+FeatureScatter(seurat_obj,feature1 = "nCount_RNA", feature2 = "percent.largest_gene",group.by ="orig.ident")
+
+FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA",group.by ="orig.ident") + geom_smooth(method = 'lm')
 ```
 
 ## Cell cycle scoring  

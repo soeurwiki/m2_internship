@@ -18,7 +18,6 @@ output:
 library(Seurat)
 library(tidyverse)
 library(ggplot2)
-library(viridis)
 library("scales")
 ```
 
@@ -108,8 +107,8 @@ metadata %>%
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(nFeature_RNA, 
-                  color = "#173664"),
+   geom_histogram(aes(nFeature_RNA), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 50) + 
   ggtitle("Distribution of nFeature_RNA ") + NoLegend()
 ```
@@ -158,8 +157,8 @@ RidgePlot(metabo_obj, features = "percent.mt", group.by = "orig.ident")
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.mt, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.mt), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 0.5) + 
   ggtitle("Distribution of Percentage Mitochondrion") + NoLegend()
 ```
@@ -172,8 +171,8 @@ RidgePlot(metabo_obj, features = "percent.ribosomal", group.by = "orig.ident")
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.ribosomal, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.ribosomal), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 0.7) + 
   ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
 ```
@@ -186,8 +185,8 @@ RidgePlot(metabo_obj, features = "percent.largest_gene", group.by = "orig.ident"
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.largest_gene, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.largest_gene), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 0.7) + 
   ggtitle("Distribution of Percentage Largest Gene") + NoLegend()
 ```

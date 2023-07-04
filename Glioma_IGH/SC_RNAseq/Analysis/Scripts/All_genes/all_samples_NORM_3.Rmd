@@ -127,15 +127,15 @@ Identify genes whose expression defines each cluster which has been identified.
 * **The ROC test**: This is a measure of how specifically a gene can predict membership of two groups. It gives a value between 0.5 (no predictive value) and 1 (perfectly predictive on its own) to say how useful each gene is at predicting. Again this is a non-parametric test which just cares about the ranked expression measures for each gene.
 
 ## Predictions  
-```{r}
+```{r, eval=FALSE}
 # This loop just runs the FindMarkers function on all of the clusters
 lapply(
-  levels(seurat_obj[["seurat_clusters"]][[1]]),
+  levels(seurat_obj$seurat_clusters),
   function(x)FindMarkers(seurat_obj,ident.1 = x, min.pct = 0.25)
 ) -> cluster.markers
 
 
-# This simply adds the cluster number to the results of FindMarkers
+# This adds the cluster number to the results of FindMarkers
 sapply(0:(length(cluster.markers)-1),function(x) {
   cluster.markers[[x+1]]$gene <<- rownames(cluster.markers[[x+1]])
   cluster.markers[[x+1]]$cluster <<- x
@@ -165,17 +165,54 @@ We can try to clean this up for any individual cluster by using the **roc analys
 FindMarkers(seurat_obj, ident.1 = 0, ident.2 = 2, test.use = "roc", only.pos = TRUE)
 ```
 
-## Cluster biomarkers  
-* `DoHeatmap` generates an expression heatmap for given cells and features. In this case, we are plotting the top 20 markers (or all markers if less than 20) for each cluster.
-
-```{r, warning=FALSE, message=FALSE}
-# find markers for every cluster compared to all remaining cells, report only the positive ones
-markers <- FindAllMarkers(seurat_obj, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
+## Biomarkers  
+```{r, eval=FALSE}
+# find markers for every cluster compared to all remaining cells, report both positive and negative ones
+markers <- FindAllMarkers(seurat_obj, only.pos = FALSE, min.pct = 0.25, logfc.threshold = 0.25, test.use = 'DESeq2', slot='counts') 
 ```
 
-```{r}
+* `DoHeatmap` generates an expression heatmap for given cells and features. In this case, we are plotting the top 20 markers (or all markers if less than 20) for each cluster.  
+```{r, eval=FALSE}
 top <- markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_log2FC)
 DoHeatmap(seurat_obj, features = top$gene) + NoLegend()
+```
+
+As we are working on cells from 2 different conditions (*prolif* or *diff*), we won't use `FindAllMarkers()` but `FindConservedMarkers()`.   
+It will separate the cells between *prolif* and *diff* conditions and then find DE genes betweeen clusters. Hence we won't have markers genes kept because of the difference in conditions but due to the difference in clusters.
+
+### Clusters markers  
+```{r, warning=FALSE, message=FALSE}
+lapply(
+  levels(seurat_obj$seurat_clusters),
+  function(x)FindConservedMarkers(seurat_obj, ident.1 = x, grouping.var='condition')
+) -> cluster.markers
+
+# This adds the cluster number to the results of FindConservedMarkers
+sapply(0:(length(cluster.markers)-1),function(x) {
+  cluster.markers[[x+1]]$gene <<- rownames(cluster.markers[[x+1]])
+  cluster.markers[[x+1]]$cluster <<- x
+})
+```
+```{r, eval=FALSE}
+## save markers to csv
+```
+
+### Population markers  
+If we consider the clusters only separating populations.  
+```{r, warning=FALSE, message=FALSE}
+lapply(
+  levels(seurat_obj$seurat_clusters),
+  function(x)FindConservedMarkers(seurat_obj, ident.1 = x, grouping.var='orig.ident')
+) -> population.markers
+
+# This adds the cluster number to the results of FindConservedMarkers
+sapply(0:(length(population.markers)-1),function(x) {
+  population.markers[[x+1]]$gene <<- rownames(population.markers[[x+1]])
+  population.markers[[x+1]]$cluster <<- x
+})
+```
+```{r, eval=FALSE}
+## save markers to csv
 ```
 
 # Save seurat object  

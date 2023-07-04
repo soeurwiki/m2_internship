@@ -54,14 +54,7 @@ normalisation.qc %>%
 ```
 
 # QC metrics  
-```{r}
-FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by ="orig.ident")
-FeatureScatter(seurat_obj,feature1 = "nCount_RNA", feature2 = "percent.largest_gene",group.by ="orig.ident")
-
-FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA",group.by ="orig.ident") + geom_smooth(method = 'lm')
-```
 ```{r, message=FALSE, warning=FALSE}
-library(viridis)
 metadata <- seurat_obj@meta.data
 ```
 
@@ -92,8 +85,8 @@ metadata %>%
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(nFeature_RNA, 
-                  color = "#173664"),
+   geom_histogram(aes(nFeature_RNA), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 50) + 
   ggtitle("Distribution of nFeature_RNA ") + NoLegend()
 ```
@@ -127,8 +120,8 @@ RidgePlot(seurat_obj, features = "percent.mt", group.by = "orig.ident")
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.mt, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.mt), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 0.5) + 
   ggtitle("Distribution of Percentage Mitochondrion") + NoLegend()
 ```
@@ -142,8 +135,8 @@ RidgePlot(seurat_obj, features = "percent.ribosomal", group.by = "orig.ident")
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.ribosomal, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.ribosomal), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 0.7) + 
   ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
 ```
@@ -172,12 +165,18 @@ RidgePlot(seurat_obj, features = "percent.largest_gene", group.by = "orig.ident"
 
 ```{r}
 ggplot(qc.metrics) + 
-   geom_histogram(aes(percent.largest_gene, 
-                  color = "#173664"),
+   geom_histogram(aes(percent.largest_gene), 
+                  color = "#558bdc", fill= "#173664",
                   binwidth = 0.7) + 
   ggtitle("Distribution of Percentage Largest Gene") + NoLegend()
 ```
+## FeatureScatter  
+```{r}
+FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "percent.mt", group.by ="orig.ident")
+FeatureScatter(seurat_obj,feature1 = "nCount_RNA", feature2 = "percent.largest_gene",group.by ="orig.ident")
 
+FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA",group.by ="orig.ident") + geom_smooth(method = 'lm')
+```
 ## Cell cycle scoring  
 ```{r, warning=FALSE}
 seurat_obj <- CellCycleScoring(seurat_obj, s.features = cc.genes.updated.2019$s.genes, g2m.features = cc.genes.updated.2019$g2m.genes, set.ident = TRUE)
