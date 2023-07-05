@@ -7,7 +7,7 @@ lapply(
   function(x){
     ### sample GF
     condition = "prolif"
-    path <- paste0("./samples/", x, "_", condition, "/")
+    path <- paste0("../../../Processing/samples/", x, "_", condition, "/")
     project <- paste0(x, "_", condition)
 
     mtx_obj <- Seurat::ReadMtx(mtx = paste0(path, "matrix.mtx.gz"),

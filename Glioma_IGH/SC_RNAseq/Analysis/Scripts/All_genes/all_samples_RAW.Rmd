@@ -22,7 +22,7 @@ library(ggplot2)
 
 ## Load seurat objects  
 ```{r}
-path = "../../../"
+path = "../Per_sample/results/"
 
 seurat.BT1_prolif <- readRDS(file = paste0(path, "QC_BT1_prolif.rds"))
 seurat.BT1_diff <- readRDS(file = paste0(path,"QC_BT1_diff.rds"))

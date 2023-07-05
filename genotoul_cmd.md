@@ -5,7 +5,7 @@ srun --pty bash
 
 ##### see current jobs
 ```
-squeue -u satia
+squeue -u username
 ```
 
 ##### nb threads
@@ -30,12 +30,12 @@ du -sh
 
 ##### cancel all jobs
 ```
-squeue -u satia | awk '{print $1}' | tail -n+2 | xargs scancel
+squeue -u username | awk '{print $1}' | tail -n+2 | xargs scancel
 ```
 
 ##### copy files to cluster
 ```
-scp -r satia@genologin.toulouse.inra.fr:/work/satia/your_folder/ .
+scp -r username@genologin.toulouse.inra.fr:/work/username/your_folder/ .
 ```
 
 ##### run Rmd scripts  

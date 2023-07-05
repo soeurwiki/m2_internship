@@ -4,18 +4,26 @@
 
 *On the cluster genotoul*
 
-Run `get_files.sh` \* Run `run_pipeline.sh`
-
+-   Run `get_files.sh`
+-   Run `run_pipeline.sh`
 ```         
 source ./Processing/get_files.sh
 source ./Processing/run_pipeline.sh
 ```
 
+*On YOUR computer*
+
+-   Run `get_mtx_genotoul.sh` : Change path to samples counts if needed.
+```         
+source ./Processing/get_mtx_genotoul.sh
+```
+
 ## Analysis
--   Run `create_seurat_samples.R`
-    -   Change the samples names if needed.
+
 -   Run `run_QC_all_samples.sh`
-    -   Choose `x1`, `x2` and `x3` for the filtering. (default: 220, 10500, 20)
+    - `create_seurat_samples.R` : Change the samples names if needed.
+    - `run_QC_all_samples.R`
+        - `one_sample_RAW.Rmd` : Choose `x1`, `x2` and `x3` for the filtering. (default: 220, 10500, 20)
 
 ### All genes
 
@@ -64,7 +72,7 @@ source ./Processing/run_pipeline.sh
 # Scripts content
 -   `create_seurat_samples.R`
     -   mtx\_*project*.rds
--   `run_QC_all_samples.sh` (run `one_sample_RAW.Rmd` for each sample): Filter one sample based on nFeature_RNA and percent Mitochondrion.
+-   `run_QC_all_samples.sh` (run `run_QC_all_samples.sh` and `one_sample_RAW.Rmd` for each sample): Filter one sample based on nFeature_RNA and percent Mitochondrion.
     -   Filtered\_*project*.rds
 -   `all_sample_RAW.Rmd` : Combined all raw filtered samples (+ remove zero count genes)
     -   Raw_merged_seurat.rds
