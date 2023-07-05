@@ -1,4 +1,6 @@
 test/
 samples/
-one_sample_RAW.ipynb
+results/
 *.ipynb
+*.rds
+*.html

@@ -12,11 +12,13 @@ source ./Processing/run_pipeline.sh
 ```
 
 ## Analysis
+-   Run `create_seurat_samples.R`
+    -   Change the samples names if needed.
+-   Run `run_QC_all_samples.sh`
+    -   Choose `x1`, `x2` and `x3` for the filtering. (default: 220, 10500, 20)
 
 ### All genes
 
--   Run `one_sample_RAW.Rmd` for **each** sample.
-    -   **Modify** `x1`, `x2` and `x3` for the filtering.
 -   Run `all_sample_RAW.Rmd`
     -   Be careful of the **path** of all samples (and all the names if script used for different data)
 -   Run `sctransform.sh`
@@ -60,9 +62,10 @@ source ./Processing/run_pipeline.sh
     -   Choose the maximum nb of genes to use as input to enrichR (default: 200)
 
 # Scripts content
-
--   `one_sample_RAW.Rmd` : Filter one sample based on nFeature_RNA and percent Mitochondrion.
-    -   QC\_*project*.rds
+-   `create_seurat_samples.R`
+    -   mtx\_*project*.rds
+-   `run_QC_all_samples.sh` (run `one_sample_RAW.Rmd` for each sample): Filter one sample based on nFeature_RNA and percent Mitochondrion.
+    -   Filtered\_*project*.rds
 -   `all_sample_RAW.Rmd` : Combined all raw filtered samples (+ remove zero count genes)
     -   Raw_merged_seurat.rds
 -   `sctransform.sh` : normalize and scale data

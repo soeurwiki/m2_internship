@@ -2,6 +2,8 @@
 title: "QC for one sample"
 author: "ATIA Safiya"
 date: "2023-06-26"
+params:
+  sample: "sample"
 output:
   html_document:
     toc: true
@@ -21,29 +23,46 @@ library(viridis)
 ```
 
 ```{r,  message=FALSE, warning=FALSE}
-path <- "../samples/LGG85_prolif/"
-project <- "LGG85_prolif"
+sample <- params$sample # sample_condition
+condition <- str_split_1(project, '_')[2]
 ```
 
 # Loading data  
-```{r}
+*min.cells* : Include features detected in at least this many cells. Will subset the counts matrix as well.  
+*min.features* : Include cells where at least this many features are detected.  
+
+```{r, eval=FALSE}
+path <- paste0("../samples/", sample)
+
 mtx_obj <- Seurat::ReadMtx(mtx = paste(path,"matrix.mtx.gz",sep = ""), 
                            cells = paste(path,"barcodes.tsv.gz",sep = ""),
                            features = paste(path,"features.tsv.gz",sep = ""))
 
 seurat_obj <- CreateSeuratObject(counts = mtx_obj,
                                         min.cells = 3, min.features = 200,
-                                        project = project)
-                
-seurat_obj                    
-```
+                                        project = sample)
 
-*min.cells* : Include features detected in at least this many cells. Will subset the counts matrix as well.  
-*min.features* : Include cells where at least this many features are detected.
+seurat_obj@meta.data$condition <- condition     
+seurat_obj    
+```
+```{r, echo=FALSE}
+seurat_obj <- readRDS(file = paste0("./results/mtx_", sample, ".rds"))
+                
+seurat_obj                  
+```
 
 # QC metrics  
 **nCount_RNA** : the total number of reads (or more correctly UMIs) in the dataset  
 **nFeature_RNA** : the number of observed genes (anything with a nonzero count)
+
+##  <span style="color:#296d98;"> Parameters </span>  
+```{r}
+## nFeature
+x1 = 220
+x2 = 10500
+## Mitochondrion
+x3 = 20
+```
 
 ## MT genes  
 Single cell datasets can be filled with large numbers of reads coming from mitochondria. These often indicate a sick cell undergoing apoptosis.
@@ -97,7 +116,7 @@ FeatureScatter(seurat_obj, feature1 = "nCount_RNA", feature2 = "nFeature_RNA") +
 A good datatset should follow the line.
 
 # Filtering  
-##  <span style="color:#296d98;"> qc metrics </span>  
+##  QC metrics
 ```{r, warning=FALSE}
 as_tibble(
   seurat_obj[[]],
@@ -109,19 +128,6 @@ head(qc.metrics)
 ```
 
 ```{r}
-## Boxplots of gene count distributions per sample  (non-normalized log2(counts) per sample.)
-
-count.table <- txi$counts
-epsilon <- 1 # pseudo-count to avoid problems with log(0)
-boxplot(log2(count.table + epsilon), col=expdes$genotype, pch=".", 
-        horizontal=TRUE, cex.axis=0.5,
-        las=1, ylab="Samples", xlab="log2(Counts +1)")
-```
-
-```{r}
-x1 = 3000
-x2 = 9000
-
 ggplot(qc.metrics) + 
    geom_histogram(aes(nFeature_RNA, 
                   color = ifelse(nFeature_RNA < x1 |  nFeature_RNA > x2 , "a", "b")),
@@ -134,8 +140,6 @@ Low-quality cells or empty droplets will often have very few genes.
 Cell doublets or multiplets may exhibit an aberrantly high gene count.
 
 ```{r}
-x3 = 20
-
 ggplot(qc.metrics) + 
    geom_histogram(aes(percent.mt, 
                   color = ifelse(percent.mt < x3 , "a", "b")),
@@ -228,5 +232,5 @@ ggplot(qc.metrics) +
 
 # Save seurat object  
 ```{r}
-saveRDS(data, file =paste0("QC_",project,".rds"))
+saveRDS(data, file =paste0("./results/Filtered_",sample,".rds"))
 ```
