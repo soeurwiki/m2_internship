@@ -1,0 +1,143 @@
+---
+title: "METABO -- Predictions of Markers for merged samples"
+author: "ATIA Safiya"
+date: "2023-08-20"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library("SCINA")
+library(ggplot2)
+```
+
+## Load seurat object (ALL GENES)
+
+```{r}
+seurat_obj <- readRDS(file = './results/rds/all_samples_Clusters.rds')
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+## Load seurat object (METABO)
+```{r}
+metabo_obj <- readRDS(file = './results/rds/all_samples_Clusters_metabo.rds')
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
+# Predictions
+```{r}
+markers_cluster <- preprocess.signatures('./results/html/cluster_markers_signatures.csv')
+as.data.frame(metabo_obj@assays$RNA[,]) -> scina.data
+
+
+SCINA(
+  scina.data,
+  markers_cluster, 
+  max_iter = 100, 
+  convergence_n = 10, 
+  convergence_rate = 0.999, 
+  sensitivity_cutoff = 0.9, 
+  rm_overlap=TRUE, 
+  allow_unknown=TRUE
+) -> scina.results
+
+metabo_obj$scina_labels <- scina.results$cell_labels
+dim(markers_cluster)
+```
+
+
+```{r}
+colors <- c( cluster_0="#f8766d", cluster_1="#db8e00", cluster_2="#aea200", cluster_3="#64b200", cluster_4="#00bd5c",cluster_5="#00c1a7", cluster_6="#00bade", cluster_7="#00a6ff", cluster_8="#b385ff", cluster_9="#ef67eb", cluster_10="#ff63b6", unknown="lightgray")
+
+DimPlot(metabo_obj,reduction = "umap", group.by = "scina_labels", cols=colors)
+DimPlot(metabo_obj,reduction = "umap", pt.size = 1, group.by = "scina_labels", cols=colors)
+```
+
+
+```{r}
+seurat_obj$scina_labels <- metabo_obj$scina_labels
+
+DimPlot(seurat_obj,reduction = "umap", group.by = "scina_labels", cols=colors)
+DimPlot(seurat_obj,reduction = "umap", pt.size = 1, group.by = "scina_labels", cols=colors)
+```
+
+## all colored by metabo
+
+```{r}
+## change all_genes clusters to metabo ones
+seurat_obj$metabo_clusters = metabo_obj$seurat_clusters
+
+DimPlot(seurat_obj, reduction = "umap", group.by= 'metabo_clusters')
+DimPlot(seurat_obj, reduction = "umap", group.by= 'metabo_clusters', label.size = 4, label = TRUE)+ NoLegend()
+```
+
+## Split by condition
+```{r}
+DimPlot(seurat_obj, reduction = "umap", group.by="metabo_clusters", split.by = "condition")
+DimPlot(seurat_obj, reduction = "umap", group.by = "metabo_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(seurat_obj, reduction = "umap", group.by="metabo_clusters", split.by = "condition")+ NoLegend()
+```
+
+## Percentage
+```{r, warning=FALSE}
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  metabo_cluster = seurat_obj$metabo_clusters,
+) %>%
+  group_by(cluster,metabo_cluster) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=metabo_cluster)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)+ 
+  NoLegend()
+```
+
+```{r, warning=FALSE}
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  metabo_cluster = seurat_obj$metabo_clusters,
+) %>%
+  group_by(cluster,metabo_cluster) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=metabo_cluster)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```

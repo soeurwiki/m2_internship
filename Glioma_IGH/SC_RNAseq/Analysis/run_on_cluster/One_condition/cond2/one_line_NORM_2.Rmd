@@ -1,0 +1,145 @@
+---
+title: "Defining clusters for one sample [Normalized]"
+author: "ATIA Safiya"
+date: "2023-07-26"
+params:
+  samp: "samp"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+library(clustree)
+library("future")
+```
+
+## Load seurat object (NORM)
+```{r}
+samp <- params$samp
+```
+
+```{r}
+seurat_obj <- readRDS(file = paste0('./Lucille/results/rds/samples/Norm_', samp, '.rds'))
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+# Non linear reduction  
+##  <span style="color:#296d98;"> Parameters </span>  
+```{r}
+pc = 50
+8482 -> saved.seed
+set.seed(saved.seed)
+thread = 8
+```
+
+## UMAP
+```{r, warning=FALSE}
+seurat_obj <- RunUMAP(seurat_obj, reduction = "pca", dims = 1:pc, seed.use = saved.seed,verbose = FALSE )
+
+DimPlot(seurat_obj, reduction = "umap", group.by = "orig.ident")
+DimPlot(seurat_obj, reduction = "umap", group.by = "orig.ident", label.size = 4, label = TRUE)+ NoLegend()
+
+DimPlot(seurat_obj, reduction = "umap", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+## tSNE
+tSNE with default Perplexity 30 :
+```{r}
+seurat_obj <- RunTSNE(seurat_obj, reduction = "pca", dims=1:pc,seed.use = saved.seed, check_duplicates = FALSE, verbose = FALSE)
+
+DimPlot(seurat_obj, reduction = "tsne", group.by = "orig.ident")
+DimPlot(seurat_obj, reduction = "tsne", group.by = "orig.ident", label.size = 4, label = TRUE)+ NoLegend()
+
+DimPlot(seurat_obj, reduction = "tsne", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ))
+```
+
+# Defining cell clusters  
+`FindNeighbors`:    
+
+* construction of a KNN graph based on the euclidean distance in PCA space, and refine the edge weights between any two cells based on the shared overlap in their local neighborhoods (Jaccard similarity).
+* *input* : the previously defined dimensionality of the dataset.
+
+`FindClusters`:   
+
+* default : Louvain algorithm  
+* iteratively group cells together, with the goal of optimizing the standard modularity function.  
+* *Resolution* : setting this parameter between 0.4-1.2 typically returns good results for single-cell datasets of around 3K cells
+
+```{r}
+seurat_obj <- FindNeighbors(seurat_obj, reduction = "pca", dims = 1:pc)
+```
+
+## Save seurat object  
+```{r}
+saveRDS(seurat_obj, file = paste0("./Lucille/results/rds/samples/", samp, "_FindNeighbors.rds"))
+```
+
+## Optimize resolution  
+```{r, message=FALSE}
+res.seurat <- seurat_obj
+
+plan("multisession", workers = thread)
+res.seurat <- FindClusters(res.seurat, resolution = 0.2)
+
+plan("multisession", workers = thread)
+res.seurat <- FindClusters(res.seurat, resolution = 0.3)
+
+plan("multisession", workers = thread)
+res.seurat <- FindClusters(res.seurat, resolution = 0.4)
+
+plan("multisession", workers = thread)
+res.seurat <- FindClusters(res.seurat, resolution = 0.5)
+
+plan("multisession", workers = thread)
+res.seurat <- FindClusters(res.seurat, resolution = 0.6)
+
+plan("multisession", workers = thread)
+res.seurat <- FindClusters(res.seurat, resolution = 0.7)
+
+plan("multisession", workers = thread)
+res.seurat <- FindClusters(res.seurat, resolution = 0.8)
+```
+
+```{r}
+clustree(res.seurat, prefix = "SCT_snn_res.")
+```
+
+```{r, message=FALSE}
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.8)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 0.9)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 1)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 1.1)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 1.2)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 1.3)
+
+plan("multisession", workers = thread)
+seurat_obj <- FindClusters(seurat_obj, resolution = 1.4)
+```
+
+```{r}
+clustree(seurat_obj, prefix = "SCT_snn_res.")
+```

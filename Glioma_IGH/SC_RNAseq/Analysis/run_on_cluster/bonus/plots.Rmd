@@ -1,0 +1,1334 @@
+---
+title: "Plots for merged samples [Normalized]"
+author: "ATIA Safiya"
+date: "2023-07-27"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+
+library("viridis")
+```
+
+## Load seurat object (NORM)
+
+```{r}
+seurat_obj <- readRDS(file = './results/rds/all_samples_Clusters.rds')
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+## Load seurat object (METABO)
+```{r}
+metabo_obj <- readRDS(file = './results/rds/all_samples_Clusters_metabo.rds')
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
+# BT1
+## All genes
+```{r}
+test <- subset(x = seurat_obj, subset = line == "BT1")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+## Metabo only
+```{r}
+test <- subset(x = metabo_obj, subset = orig.ident == "BT1_diff")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+# BT2
+## All genes
+```{r}
+test <- subset(x = seurat_obj, subset = line == "BT2")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+## Metabo only
+```{r}
+test <- subset(x = metabo_obj, subset = orig.ident == "BT1_diff")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+# BT54
+## All genes
+```{r}
+test <- subset(x = seurat_obj, subset = line == "BT54")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+## Metabo only
+```{r}
+test <- subset(x = metabo_obj, subset = orig.ident == "BT1_diff")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+
+
+# BT88
+## All genes
+```{r}
+test <- subset(x = seurat_obj, subset = line == "BT88")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+## Metabo only
+```{r}
+test <- subset(x = metabo_obj, subset = orig.ident == "BT1_diff")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+
+# LGG275
+## All genes
+```{r}
+test <- subset(x = seurat_obj, subset = line == "LGG275")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+## Metabo only
+```{r}
+test <- subset(x = metabo_obj, subset = orig.ident == "BT1_diff")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+# LGG336
+## All genes
+```{r}
+test <- subset(x = seurat_obj, subset = line == "LGG336")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+## Metabo only
+```{r}
+test <- subset(x = metabo_obj, subset = orig.ident == "BT1_diff")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+
+# LGG349
+## All genes
+```{r}
+test <- subset(x = seurat_obj, subset = line == "LGG349")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+## Metabo only
+```{r}
+test <- subset(x = metabo_obj, subset = orig.ident == "BT1_diff")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+
+
+# LGG85
+## All genes
+```{r}
+test <- subset(x = seurat_obj, subset = line == "LGG85")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+## Metabo only
+```{r}
+test <- subset(x = metabo_obj, subset = orig.ident == "BT1_diff")
+```
+
+```{r}
+features <- rownames(test@assays$RNA@counts)
+
+DimPlot(test, reduction = "pca", group.by = "orig.ident")
+DimPlot(test, reduction = "pca", group.by = "seurat_clusters")
+DimPlot(test, reduction = "pca", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+
+DimPlot(test, reduction = "harmony", group.by = "orig.ident")
+DimPlot(test, reduction = "harmony", group.by = "seurat_clusters")
+DimPlot(test, reduction = "harmony", group.by = "Phase", cols = c(G1='azure4',G2M='dodgerblue', S='tomato3' ) )
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by = "orig.ident")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "pca", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "harmony", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "harmony", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(test, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(test, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+### Features  
+```{r}
+if( "SOX9" %in% features){ FeaturePlot(test, features= "SOX9", reduction = "umap") }
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "condition")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "condition")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "condition")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "condition")}
+
+
+if( "APOE" %in% features){ FeaturePlot(test, features= "APOE", reduction = "umap", split.by = "line")}
+if( "KCNN3" %in% features){ FeaturePlot(test, features= "KCNN3", reduction = "umap", split.by = "line")}
+if( "CRYAB" %in% features){ FeaturePlot(test, features= "CRYAB", reduction = "umap", split.by = "line")}
+if( "ID4" %in% features){ FeaturePlot(test, features= "ID4", reduction = "umap", split.by = "line")}
+```
+
+
+```{r}
+if( "OLIG1" %in% features){ FeaturePlot(test, features= "OLIG1", reduction = "umap")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "condition")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "condition")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "condition")}
+
+
+if( "PDGFRA" %in% features){ FeaturePlot(test, features= "PDGFRA", reduction = "umap", split.by = "line")}
+if( "SOX8" %in% features){ FeaturePlot(test, features= "SOX8", reduction = "umap", split.by = "line")}
+if( "SOX4" %in% features){ FeaturePlot(test, features= "SOX4", reduction = "umap", split.by = "line")}
+```
+
+# Features  
+```{r}
+FeaturePlot(seurat_obj, features= "SOX9", reduction = "umap")
+FeaturePlot(seurat_obj, features= c("APOE", "KCNN3", "CRYAB", "ID4"), reduction = "umap")
+
+FeaturePlot(seurat_obj, features= "APOE", reduction = "umap", split.by = "condition")
+FeaturePlot(seurat_obj, features= "KCNN3", reduction = "umap", split.by = "condition")
+FeaturePlot(seurat_obj, features= "CRYAB", reduction = "umap", split.by = "condition")
+FeaturePlot(seurat_obj, features= "ID4", reduction = "umap", split.by = "condition")
+
+
+FeaturePlot(seurat_obj, features= "APOE", reduction = "umap", split.by = "line")
+FeaturePlot(seurat_obj, features= "KCNN3", reduction = "umap", split.by = "line")
+FeaturePlot(seurat_obj, features= "CRYAB", reduction = "umap", split.by = "line")
+FeaturePlot(seurat_obj, features= "ID4", reduction = "umap", split.by = "line")
+```
+
+
+```{r}
+FeaturePlot(seurat_obj, features= "OLIG1", reduction = "umap")
+FeaturePlot(seurat_obj, features= c("PDGFRA", "SOX8", "SOX4"), reduction = "umap")
+
+FeaturePlot(seurat_obj, features= "PDGFRA", reduction = "umap", split.by = "condition")
+FeaturePlot(seurat_obj, features= "SOX8", reduction = "umap", split.by = "condition")
+FeaturePlot(seurat_obj, features= "SOX4", reduction = "umap", split.by = "condition")
+
+
+FeaturePlot(seurat_obj, features= "PDGFRA", reduction = "umap", split.by = "line")
+FeaturePlot(seurat_obj, features= "SOX8", reduction = "umap", split.by = "line")
+FeaturePlot(seurat_obj, features= "SOX4", reduction = "umap", split.by = "line")
+```

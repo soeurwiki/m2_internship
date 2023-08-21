@@ -1,0 +1,192 @@
+---
+title: "METABO -- Clusters annotations for merged samples"
+author: "ATIA Safiya"
+date: "2023-07-27"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object
+
+## Load required packages
+
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+library('enrichR')
+
+## annotation
+library("SCINA")
+library(clustree)
+
+library("viridis")
+```
+
+## Load seurat object (ALL GENES)
+
+```{r}
+seurat_obj <- readRDS(file = './results/rds/all_samples_Clusters.rds')
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+## Load seurat object (METABO)
+```{r}
+metabo_obj <- readRDS(file = './results/rds/all_samples_Mca_metabo.rds')
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
+## [ Parameters ]{style="color:#296d98;"}
+
+```{r}
+enrichR_db = "KEGG_2021_Human"
+nb_maxgenes = 200
+pc = 50
+```
+
+# Comparison with all genes
+Coloring metabo clusters on all genes plots (to see in which cluster the cells are going to be associated with the metabo genes only)  
+```{r}
+table(rownames(seurat_obj[[]]) == rownames(metabo_obj[[]]))
+```
+
+```{r}
+levels(metabo_obj$seurat_clusters)
+levels(seurat_obj$seurat_clusters)
+```
+
+```{r}
+## change all_genes clusters to metabo ones
+seurat_obj$metabo_clusters = metabo_obj$seurat_clusters
+
+DimPlot(seurat_obj, reduction = "umap", group.by= 'metabo_clusters')
+DimPlot(seurat_obj, reduction = "umap", group.by= 'metabo_clusters', label.size = 4, label = TRUE)+ NoLegend()
+
+DimPlot(seurat_obj, reduction = "tsne", group.by= 'metabo_clusters')
+DimPlot(seurat_obj, reduction = "tsne", group.by= 'metabo_clusters', label.size = 4, label = TRUE)+ NoLegend()
+```
+
+```{r, message=FALSE, warning=FALSE}
+seurat_obj$cluster.1 <- seurat_obj$seurat_clusters
+seurat_obj$cluster.2 = metabo_obj$seurat_clusters
+
+clustree(seurat_obj, prefix = "cluster.")
+```
+
+```{r, message=FALSE, warning=FALSE}
+seurat_obj$cluster.2 <- seurat_obj$seurat_clusters
+seurat_obj$cluster.1 = metabo_obj$seurat_clusters
+
+clustree(seurat_obj, prefix = "cluster.")
+```
+
+## Split by condition
+```{r}
+DimPlot(seurat_obj, reduction = "umap", group.by="metabo_clusters", split.by = "condition")
+DimPlot(seurat_obj, reduction = "umap", group.by = "metabo_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(seurat_obj, reduction = "umap", group.by="metabo_clusters", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(seurat_obj, reduction = "tsne", group.by="metabo_clusters", split.by = "condition")
+DimPlot(seurat_obj, reduction = "tsne", group.by = "metabo_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(seurat_obj, reduction = "tsne", group.by="metabo_clusters", split.by = "condition")+ NoLegend()
+```
+
+## Percentage
+```{r, warning=FALSE}
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  metabo_cluster = seurat_obj$metabo_clusters,
+) %>%
+  group_by(cluster,metabo_cluster) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=metabo_cluster)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)+ 
+  NoLegend()
+```
+
+```{r, warning=FALSE}
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  metabo_cluster = seurat_obj$metabo_clusters,
+) %>%
+  group_by(cluster,metabo_cluster) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=metabo_cluster)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+# Automated Cell type Annotation
+
+```{r}
+as.data.frame(metabo_obj@assays$RNA[,]) -> scina.data
+```
+
+## Oligo/Astro
+
+```{r}
+## Some markers of oligo/astro cells
+mature_oligo <- c("CNP", "UGT8")
+astro <- c("SLC1A3","APOE", "AQP4","ALDH1L1", "FABP7")
+
+markers_astro_oligo <- list("astro"=astro, "mature_oligo"=mature_oligo)
+```
+
+```{r}
+SCINA(
+  scina.data,
+  markers_astro_oligo, 
+  max_iter = 100, 
+  convergence_n = 10, 
+  convergence_rate = 0.999, 
+  sensitivity_cutoff = 0.9, 
+  rm_overlap=TRUE, 
+  allow_unknown=TRUE
+) -> scina.results
+
+metabo_obj$scina_labels <- scina.results$cell_labels
+```
+
+```{r}
+colors <- c(astro='seagreen4', mature_oligo='orangered3', unknown="lightgray")
+
+DimPlot(metabo_obj,reduction = "umap", group.by = "scina_labels", cols = colors)
+DimPlot(metabo_obj,reduction = "tsne", group.by = "scina_labels", cols = colors)
+```

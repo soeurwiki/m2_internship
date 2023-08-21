@@ -1,0 +1,46 @@
+---
+title: "plots [Normalized]"
+author: "ATIA Safiya"
+date: "2023-07-26"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+library("scales")
+library(harmony)
+```
+
+## Load seurat objects (RAW)
+
+```{r}
+seurat_obj <- readRDS(file = './results/rds/Norm_all_samples.rds')
+
+```
+
+```{r}
+mat <- Seurat::GetAssayData(seurat_obj, assay = "RNA", slot = "scale.data") ## instead of RNA
+harmony <- seurat_obj[["harmony"]]
+
+# Get the total variance:
+total_variance <- sum(matrixStats::rowVars(mat))
+eigValues = (harmony@stdev)^2  ## EigenValues
+
+varExplained = eigValues / total_variance
+
+pc1 = percent(varExplained[1], accuracy = 0.01)
+pc2 = percent(varExplained[2], accuracy = 0.01)
+
+DimPlot(seurat_obj, reduction = "harmony", group.by = "orig.ident") + xlab(paste0("PC_1 : ", pc1)) + ylab(paste0("PC_2 :", pc2 ))
+```

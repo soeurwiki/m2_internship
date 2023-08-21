@@ -1,0 +1,330 @@
+---
+title: "METABO -- QC & Markers of clusters for merged samples"
+author: "ATIA Safiya"
+date: "2023-07-27"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+library(clustree)
+```
+
+## Load seurat object (ALL GENES)
+
+```{r}
+seurat_obj <- readRDS(file = './results/rds/all_samples_FindNeighbors.rds')
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+## Load seurat object (METABO)
+```{r}
+metabo_obj <- readRDS(file = './results/rds/all_samples_FindNeighbors_metabo.rds')
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
+## <span style="color:#296d98;"> Parameters </span>  
+```{r}
+res = 0.4
+```
+
+# Defining cell clusters  
+## Optimize resolution  
+```{r, message=FALSE}
+metabo_obj <- FindClusters(metabo_obj, resolution = res)
+levels(metabo_obj$seurat_clusters)
+```
+
+## Plot clusters  
+```{r}
+DimPlot(metabo_obj, reduction = "pca", label = TRUE, group.by = "seurat_clusters") + ggtitle("PC1 vs PC2 with Clusters")
+
+DimPlot(metabo_obj, reduction = "harmony", label = TRUE, group.by = "seurat_clusters") + ggtitle("PC1 vs PC2 with Clusters")
+```
+
+```{r}
+DimPlot(metabo_obj, reduction = "umap", group.by = "seurat_clusters")
+DimPlot(metabo_obj, reduction = "umap", label.size = 4, label = TRUE, group.by = "seurat_clusters")+ NoLegend()
+```
+
+```{r}
+DimPlot(metabo_obj, reduction = "tsne", group.by = "seurat_clusters")
+DimPlot(metabo_obj, reduction = "tsne", label.size = 4, label = TRUE, group.by = "seurat_clusters")+ NoLegend()
+```
+
+### Split by condition
+```{r}
+DimPlot(metabo_obj, reduction = "umap", group.by="seurat_clusters", split.by = "condition")
+DimPlot(metabo_obj, reduction = "umap", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(metabo_obj, reduction = "umap", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(metabo_obj, reduction = "tsne", group.by="seurat_clusters", split.by = "condition")
+DimPlot(metabo_obj, reduction = "tsne", group.by = "seurat_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(metabo_obj, reduction = "tsne", group.by="seurat_clusters", split.by = "condition")+ NoLegend()
+```
+
+## QC metrics  
+Now that we have our clusters, we can look to see if they are being influenced by any of the QC metrics.  
+
+### Nb of reads  
+```{r, message=FALSE}
+VlnPlot(metabo_obj, features="nCount_RNA", group.by = "seurat_clusters", pt.size = 0)
+RidgePlot(metabo_obj, features = "nCount_RNA", group.by = "seurat_clusters")
+```
+
+### Nb of genes    
+```{r, message=FALSE}
+VlnPlot(metabo_obj, features="nFeature_RNA", group.by = "seurat_clusters", pt.size = 0)
+RidgePlot(metabo_obj, features = "nFeature_RNA", group.by = "seurat_clusters")
+```
+
+### MT genes  
+```{r, message=FALSE}
+VlnPlot(metabo_obj, features = "percent.mt", group.by = "seurat_clusters", pt.size = 0)
+RidgePlot(metabo_obj, features = "percent.mt", group.by = "seurat_clusters")
+```
+
+### Ribosomal genes  
+```{r, message=FALSE}
+VlnPlot(metabo_obj, features = "percent.ribosomal", group.by = "seurat_clusters", pt.size = 0)
+RidgePlot(metabo_obj, features = "percent.ribosomal", group.by = "seurat_clusters")
+```
+
+### Largest gene  
+```{r, message=FALSE}
+VlnPlot(metabo_obj, features = "percent.largest_gene", group.by = "seurat_clusters", pt.size = 0)
+RidgePlot(metabo_obj, features = "percent.largest_gene", group.by = "seurat_clusters")
+```
+
+```{r}
+# which largest gene
+metabo_obj[[]] %>%
+  group_by(seurat_clusters, largest_gene) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  group_by(seurat_clusters) %>%
+  slice(1:2) %>%
+  ungroup() %>%
+  arrange(seurat_clusters, desc(n))
+```
+
+### Cell cycle  
+```{r}
+metabo_obj@meta.data %>%
+  group_by(seurat_clusters,Phase) %>%
+  count() %>%
+  group_by(seurat_clusters) %>%
+  mutate(percent=100*n/sum(n)) %>%
+  ungroup() %>%
+  ggplot(aes(x=seurat_clusters,y=percent, fill=Phase)) +
+  scale_fill_manual( values=c(G1='azure4',G2M='dodgerblue',S='tomato3' )) +
+  geom_col() +
+  ggtitle("Percentage of cell cycle phases per sample")
+```
+
+```{r}
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  Phase = metabo_obj$Phase,
+) %>%
+  group_by(cluster,Phase) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=Phase)) +
+  scale_fill_manual( values=c(G1='azure4',G2M='dodgerblue',S='tomato3' )) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+### Orig ident
+```{r}
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  orig = metabo_obj$orig.ident,
+) %>%
+  group_by(cluster,orig) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=orig)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+# Finding markers for each cluster  
+From now on, we can use `seurat_obj` because its clusters where changed to metabo ones (only if the goal is to work with all genes of course).  
+
+Identify genes whose expression defines each cluster which has been identified.
+
+* **The Wilcox rank sum test**: This identifies genes which are differentially regulated between two groups of cells. It is a non-parametric test which makes very few assumptions about the behaviour of the data and just looks for genes which have expression which is consistently ranked more highly in one group of cells compared to another.  
+
+* **The ROC test**: This is a measure of how specifically a gene can predict membership of two groups. It gives a value between 0.5 (no predictive value) and 1 (perfectly predictive on its own) to say how useful each gene is at predicting. Again this is a non-parametric test which just cares about the ranked expression measures for each gene.
+
+## Biomarkers  
+As we are working on cells from 2 different conditions (*prolif* or *diff*), we won't use `FindAllMarkers()` but `FindConservedMarkers()`.   
+It will separate the cells between *prolif* and *diff* conditions and then find DE genes betweeen clusters. Hence we won't have markers genes kept because of the difference in conditions but due to the difference in clusters.
+
+### Clusters markers [metabo genes]
+
+```{r, warning=FALSE, message=FALSE}
+
+lapply(
+  levels(metabo_obj$seurat_clusters),
+  function(x)FindConservedMarkers(metabo_obj, assay = "RNA", ident.1 = x, grouping.var='condition', verbose=FALSE)
+) -> cluster.markers
+
+# This adds the cluster number to the results of FindConservedMarkers
+sapply(0:(length(cluster.markers)-1),function(x) {
+  cluster.markers[[x+1]]$gene <<- rownames(cluster.markers[[x+1]])
+  cluster.markers[[x+1]]$cluster <<- x
+})
+
+```
+
+* `DoHeatmap` generates an expression heatmap for given cells and features. In this case, we are plotting the top 20 markers (or all markers if less than 20) for each cluster.   
+```{r}
+cluster.markers <- do.call(rbind.data.frame, cluster.markers)
+dim(cluster.markers)
+```
+
+```{r}
+prolif <- cluster.markers[which( cluster.markers$diff_p_val == cluster.markers$max_pval), ]
+diff <- cluster.markers[which( cluster.markers$prolif_p_val == cluster.markers$max_pval), ]
+dim(prolif)
+dim(diff)
+```
+
+```{r}
+prolif <- prolif[, c('prolif_p_val', 'prolif_avg_log2FC', 'prolif_p_val_adj', 'gene', 'cluster' )]
+head(prolif)
+```
+
+```{r}
+diff <- diff[, c('diff_p_val', 'diff_avg_log2FC', 'diff_p_val_adj', 'gene', 'cluster' )]
+head(diff)
+```
+
+```{r}
+diff_markers <- diff[order(diff$diff_p_val_adj, decreasing = FALSE),]
+prolif_markers <- prolif[order(prolif$prolif_p_val_adj, decreasing = FALSE),]
+```
+
+### diff
+```{r}
+diff_markers %>%
+    group_by(cluster) %>%
+    top_n(n = 10, wt = diff_avg_log2FC) -> top10
+
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(0,1)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+```{r}
+
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(2,3,4)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+```{r}
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(5,6,7)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+```{r}
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(8,9,10)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+```{r}
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(11,12)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+```{r}
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(13,14)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+
+### prolif
+```{r}
+prolif_markers %>%
+    group_by(cluster) %>%
+    top_n(n = 10, wt = prolif_avg_log2FC) -> top10
+
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(0,1)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+```{r}
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(2,3,4)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+```{r}
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(5,6,7)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+```{r}
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(8,9,10)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+```{r}
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(11,12)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+```{r}
+DoHeatmap(subset(metabo_obj, subset = seurat_clusters %in% c(13,14)), 
+          features = top10$gene) + theme(axis.text=element_text(size=4)) + NoLegend()
+```
+
+### save markers lists
+```{r}
+saveRDS(cluster.markers, file = "./results/html/all_samples_cluster.markers_metabo.rds")
+```
+
+# Save seurat object  
+```{r}
+saveRDS(metabo_obj, file = "./results/rds/all_samples_Markers_metabo.rds")
+```

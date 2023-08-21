@@ -1,0 +1,22 @@
+---
+title: "container test"
+author: "ATIA Safiya"
+date: "2023-07-11"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+It's a test.
+## Load all packages  
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+```
+To build the image :
+
+ sudo singularity build --writable-tmpfs r.sif singulariy-r.def  

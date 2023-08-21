@@ -1,0 +1,367 @@
+---
+title: "METABO -- Clusters annotations for merged samples"
+author: "ATIA Safiya"
+date: "2023-07-26"
+params:
+  line: "line"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object
+
+## Load required packages
+
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+library('enrichR')
+
+## annotation
+library("SCINA")
+library(clustree)
+
+library("viridis")
+```
+
+## Load seurat object (ALL GENES)
+```{r}
+line <- params$line
+```
+```{r}
+seurat_obj <- readRDS(file = paste0('./results/rds/samples/', line, '_Clusters.rds'))
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+## Load seurat object (METABO)
+```{r}
+metabo_obj <- readRDS(file = paste0('./results/rds/samples/', line, '_Mca_metabo.rds'))
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
+## [ Parameters ]{style="color:#296d98;"}
+
+```{r}
+enrichR_db = "KEGG_2021_Human"
+nb_maxgenes = 200
+pc = 50
+```
+
+
+# Comparison with all genes
+Coloring metabo clusters on all genes plots (to see in which cluster the cells are going to be associated with the metabo genes only)  
+```{r}
+table(rownames(seurat_obj[[]]) == rownames(metabo_obj[[]]))
+```
+
+```{r}
+levels(metabo_obj$seurat_clusters)
+levels(seurat_obj$seurat_clusters)
+```
+
+```{r}
+## change all_genes clusters to metabo ones
+seurat_obj$metabo_clusters = metabo_obj$seurat_clusters
+
+DimPlot(seurat_obj, reduction = "umap", group.by= 'metabo_clusters')
+DimPlot(seurat_obj, reduction = "umap", group.by= 'metabo_clusters', label.size = 4, label = TRUE)+ NoLegend()
+
+DimPlot(seurat_obj, reduction = "tsne", group.by= 'metabo_clusters')
+DimPlot(seurat_obj, reduction = "tsne", group.by= 'metabo_clusters', label.size = 4, label = TRUE)+ NoLegend()
+```
+
+```{r, warning=FALSE, message=FALSE}
+seurat_obj$cluster.1 <- seurat_obj$seurat_clusters
+seurat_obj$cluster.2 = metabo_obj$seurat_clusters
+
+clustree(seurat_obj, prefix = "cluster.")
+```
+
+## Split by condition
+```{r}
+DimPlot(seurat_obj, reduction = "umap", group.by="metabo_clusters", split.by = "condition")
+DimPlot(seurat_obj, reduction = "umap", group.by = "metabo_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(seurat_obj, reduction = "umap", group.by="metabo_clusters", split.by = "condition")+ NoLegend()
+```
+
+```{r}
+DimPlot(seurat_obj, reduction = "tsne", group.by="metabo_clusters", split.by = "condition")
+DimPlot(seurat_obj, reduction = "tsne", group.by = "metabo_clusters", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+DimPlot(seurat_obj, reduction = "tsne", group.by="metabo_clusters", split.by = "condition")+ NoLegend()
+```
+
+## Percentage
+```{r, warning=FALSE}
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  metabo_cluster = seurat_obj$metabo_clusters,
+) %>%
+  group_by(cluster,metabo_cluster) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=metabo_cluster)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)+ 
+  NoLegend()
+```
+
+```{r, warning=FALSE}
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  metabo_cluster = seurat_obj$metabo_clusters,
+) %>%
+  group_by(cluster,metabo_cluster) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=metabo_cluster)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+# Automated Cell type Annotation
+
+```{r}
+as.data.frame(metabo_obj@assays$SCT[,]) -> scina.data
+```
+
+## Oligo/Astro
+
+```{r}
+## Some markers of oligo/astro cells
+mature_oligo <- c("CNP", "UGT8")
+astro <- c("SLC1A3","APOE", "AQP4","ALDH1L1", "FABP7")
+
+markers_astro_oligo <- list("astro"=astro, "mature_oligo"=mature_oligo)
+```
+
+```{r}
+SCINA(
+  scina.data,
+  markers_astro_oligo, 
+  max_iter = 100, 
+  convergence_n = 10, 
+  convergence_rate = 0.999, 
+  sensitivity_cutoff = 0.9, 
+  rm_overlap=TRUE, 
+  allow_unknown=TRUE
+) -> scina.results
+
+metabo_obj$scina_labels <- scina.results$cell_labels
+```
+
+```{r}
+colors <- c(astro='seagreen4', mature_oligo='orangered3', unknown="lightgray")
+
+DimPlot(metabo_obj,reduction = "umap", group.by = "scina_labels", cols = colors)
+DimPlot(metabo_obj,reduction = "tsne", group.by = "scina_labels", cols = colors)
+```
+
+## Panglao database  
+### MCA  
+```{r, eval=FALSE}
+metabo_obj <- RunMCA(metabo_obj)
+```
+```{r, eval=FALSE}
+DimPlotMC(metabo_obj, reduction = "mca", group.by = 'orig.ident', features = c("APOE"), as.text = T)
+```
+
+### Obtaining brain cell-type gene signatures  
+```{r,eval=FALSE}
+# download all cell-type gene signatures from panglaoDB
+panglao <- read_tsv("https://panglaodb.se/markers/PanglaoDB_markers_27_Mar_2020.tsv.gz")
+
+# restricting the analysis to brain specific gene signatues
+panglao_brain <- panglao %>% filter(organ == "Brain")
+  ##             panglao %>%  filter(str_detect(species,"Hs"))
+  ## To obtain gene signatures for all genes
+
+# restricting to human specific genes
+panglao_brain <- panglao_brain %>%  filter(str_detect(species,"Hs"))
+
+# converting dataframes into a list of vectors, which is the format needed as input for CellID
+panglao_brain <- panglao_brain %>%  
+  group_by(`cell type`) %>%  
+  summarise(geneset = list(`official gene symbol`))
+
+brain_signatures <- setNames(panglao_brain$geneset, panglao_brain$`cell type`)
+```
+
+### Per-cell gene signature enrichments
+
+```{r, eval=FALSE}
+# Performing per-cell hypergeometric tests against the gene signature collection
+HGT_brain_signatures <- RunCellHGT(metabo_obj, pathways = brain_signatures, dims = 1:pc, n.features = nb_maxgenes)
+```
+```{r, echo=FALSE}
+HGT_brain_signatures <- readRDS( paste0('./results/rds/samples/', line, '_HGT_brain_signatures_metabo.rds'))
+```
+
+```{r}
+# For each cell, assess the signature with the lowest corrected p-value (max -log10 corrected p-value)
+brain_signatures_prediction <- rownames(HGT_brain_signatures)[apply(HGT_brain_signatures, 2, which.max)]
+
+# For each cell, evaluate if the lowest p-value is significant
+brain_signatures_prediction_signif <- ifelse(apply(HGT_brain_signatures, 2, max)>2, yes = brain_signatures_prediction, "unassigned")
+
+# Save cell type predictions as metadata within the Seurat object
+metabo_obj$brain_signatures_prediction <- brain_signatures_prediction_signif
+```
+
+### Plots
+```{r}
+nb <- length(unique(metabo_obj$brain_signatures_prediction))
+
+DimPlot(metabo_obj, reduction = "umap", group.by = "brain_signatures_prediction", label.size = 4, label = TRUE, cols= c(viridis(nb-1),"gray")) + NoLegend()
+DimPlot(metabo_obj, reduction = "umap", group.by = "brain_signatures_prediction", cols= c(viridis(nb-1),"gray")) + NoLegend()
+DimPlot(metabo_obj, reduction = "umap",  group.by = "brain_signatures_prediction", cols= c(viridis(nb-1),"gray"))
+```
+
+
+```{r}
+DimPlot(metabo_obj, reduction = "tsne", group.by = "brain_signatures_prediction", cols= c(viridis(nb-1),"gray")) + NoLegend()
+
+## see the legend
+DimPlot(metabo_obj, reduction = "tsne", group.by = "brain_signatures_prediction", label.size = 4, label = TRUE, cols= c(viridis(nb-1),"gray")) + NoLegend()
+DimPlot(metabo_obj, reduction = "tsne",  group.by = "brain_signatures_prediction", cols= c(viridis(nb-1),"gray"))
+```
+
+#### Percentage
+```{r}
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  cell_type = metabo_obj$brain_signatures_prediction
+) %>%
+  group_by(cluster,cell_type) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=cell_type)) +
+  scale_fill_manual(values=c(viridis(nb-1),"gray"))+
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL) +
+  NoLegend()
+```
+
+```{r}
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  cell_type = metabo_obj$brain_signatures_prediction
+) %>%
+  group_by(cluster,cell_type) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=cell_type)) +
+  scale_fill_manual(values=c(viridis(nb-1),"gray"))+
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL) 
+```
+
+#### Split by condition
+```{r}
+DimPlot(metabo_obj, reduction = "umap", group.by = "brain_signatures_prediction", split.by = "condition", label.size = 4, label = TRUE, cols= c(viridis(nb-1),"gray"))+ NoLegend()
+
+DimPlot(metabo_obj, reduction = "umap", group.by="brain_signatures_prediction", split.by = "condition", cols= c(viridis(nb-1),"gray"))+ NoLegend()
+```
+
+```{r}
+DimPlot(metabo_obj, reduction = "tsne", group.by = "brain_signatures_prediction", split.by = "condition", label.size = 4, label = TRUE, cols= c(viridis(nb-1),"gray"))+ NoLegend()
+
+DimPlot(metabo_obj, reduction = "tsne", group.by="brain_signatures_prediction", split.by = "condition", cols= c(viridis(nb-1),"gray"))+ NoLegend()
+```
+
+## Cell clusters annotation
+
+With only gene markers, can we find the clusters defined previously ? (In other words are they enough to find back the clusters ?)
+
+```{r, eval=FALSE}
+DimPlot(metabo_obj,reduction = "umap",  group.by = "scina_labels", cols=cluster_colors)
+DimPlot(metabo_obj,reduction = "tsne",  group.by = "scina_labels", cols=cluster_colors)
+```
+
+# Ontology  
+**max.genes** = Maximum number of genes to use as input to enrichR.
+**test.use** = wilcox
+
+## enrichR  
+### Metabo genes only
+Returns enriched and depleted barplots with the top enriched/depleted GO terms from EnrichR. (calculated with all genes but based on metabo clusters)  
+```{r, message=FALSE}
+lapply(
+  levels(metabo_obj$seurat_clusters),
+  function(x)DEenrichRPlot(metabo_obj,  ident.1 = x,  max.genes = nb_maxgenes, return.gene.list = FALSE, enrich.database =  enrichR_db)
+)
+```
+
+### All genes
+```{r, message=FALSE}
+## add all genes to analyze metabo clusters
+enrich_obj <- seurat_obj
+enrich_obj$seurat_clusters <- metabo_obj$seurat_clusters
+```
+
+```{r, message=FALSE}
+lapply(
+  levels(enrich_obj$seurat_clusters),
+  function(x)DEenrichRPlot(enrich_obj,  ident.1 = x, assay = "SCT", max.genes = nb_maxgenes, return.gene.list = FALSE, enrich.database =  enrichR_db)
+)
+```
+
+# Save seurat object
+
+```{r}
+saveRDS(metabo_obj, file = paste0("./results/rds/samples/", line, "_Clusters_metabo.rds"))
+```

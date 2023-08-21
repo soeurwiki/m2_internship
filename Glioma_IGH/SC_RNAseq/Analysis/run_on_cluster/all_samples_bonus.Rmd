@@ -1,0 +1,192 @@
+---
+title: "METABO -- Clusters annotations for merged samples"
+author: "ATIA Safiya"
+date: "2023-06-26"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object
+
+## Load required packages
+
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+library('enrichR')
+
+## annotation
+library("SCINA")
+
+library("viridis")
+```
+
+## Load seurat object (ALL GENES)
+```{r}
+seurat_obj <- readRDS(file = './results/rds/merged_seurat_Clusters.rds')
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+## Load seurat object (METABO)
+```{r}
+metabo_obj <- readRDS(file = './results/rds/merged_seurat_Clusters_metabo.rds')
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
+# PCA
+
+```{r}
+DimPlot(seurat_obj, reduction = "pca", group.by = "orig.ident", label.size = 4, label = TRUE)
+DimPlot(seurat_obj, reduction = "pca", group.by="orig.ident", split.by = "condition")+ NoLegend()
+DimPlot(seurat_obj, reduction = "umap", group.by="orig.ident", split.by = "condition")+ NoLegend()
+DimPlot(seurat_obj, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(seurat_obj, reduction = "umap", group.by="orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+# UMAP
+
+```{r}
+DimPlot(metabo_obj, reduction = "pca", group.by = "orig.ident", label.size = 4, label = TRUE)
+DimPlot(metabo_obj, reduction = "pca", group.by = "orig.ident", split.by = "condition")+ NoLegend()
+DimPlot(metabo_obj, reduction = "umap", group.by = "orig.ident", split.by = "condition")+ NoLegend()
+DimPlot(metabo_obj, reduction = "umap", group.by="orig.ident", split.by = "condition")
+DimPlot(metabo_obj, reduction = "umap", group.by="orig.ident", split.by = "condition", label.size = 4, label = TRUE)+ NoLegend()
+```
+
+
+
+# Panglao
+```{r}
+nb <- length(unique(seurat_obj$brain_signatures_prediction))
+
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  cell_type = seurat_obj$brain_signatures_prediction
+) %>%
+  group_by(cluster,cell_type) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=cell_type)) +
+  scale_fill_manual(values=c(viridis(nb-1),"gray"))+
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL) +
+  NoLegend()
+
+
+
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  cell_type = seurat_obj$brain_signatures_prediction
+) %>%
+  group_by(cluster,cell_type) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=cell_type)) +
+  scale_fill_manual(values=c(viridis(nb-1),"gray"))+
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL) 
+```
+
+```{r}
+nb <- length(unique(metabo_obj$brain_signatures_prediction))
+
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  cell_type = metabo_obj$brain_signatures_prediction
+) %>%
+  group_by(cluster,cell_type) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=cell_type)) +
+  scale_fill_manual(values=c(viridis(nb-1),"gray"))+
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)+ 
+  NoLegend()
+
+
+
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  cell_type = metabo_obj$brain_signatures_prediction
+) %>%
+  group_by(cluster,cell_type) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=cell_type)) +
+  scale_fill_manual(values=c(viridis(nb-1),"gray"))+
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+# Clusters
+```{r}
+DimPlot(seurat_obj, reduction = "umap", group.by = "seurat_clusters", label.size = 4, label = TRUE)
+DimPlot(metabo_obj, reduction = "umap",  split.by = "condition")+ NoLegend()
+DimPlot(metabo_obj, reduction = "umap",  split.by = "condition")
+DimPlot(metabo_obj, reduction = "umap",  split.by = "condition", label.size = 4, label = TRUE)
+```
+
+# Comparison
+
+```{r}
+seurat_obj$metabo_clusters = metabo_obj$seurat_clusters
+
+DimPlot(seurat_obj, group.by= 'metabo_clusters', reduction = "umap")
+DimPlot(seurat_obj, reduction = "umap", group.by= 'metabo_clusters', split.by = "condition")
+DimPlot(seurat_obj, reduction = "umap", group.by= 'metabo_clusters', split.by = "condition")+ NoLegend()
+```

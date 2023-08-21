@@ -1,0 +1,48 @@
+*Copy/paste the code lines in the terminal to analyze SC RNA-seq data.*
+
+# 1-Processing
+
+``` bash
+source ./get_files.sh
+source ./run_pipeline.sh
+```
+
+/!\\ All the samples must be in this form : **SAMPLE_prolif** or **SAMPLE_diff**
+
+-   Please modify by hand the directories in cellranger : `/cellranger/count/sample-SAMPLE_(diff/prolif)`
+
+``` bash
+sbatch --output=1rmd.out --wrap=" source ./rmd_1.sh "
+```
+
+-   Modify args.txt (pc + doublet_rate)
+
+# 2-Analysis
+
+``` bash
+sbatch --output=2rmd.out --wrap=" source ./rmd_2.sh "
+```
+
+-   Choose pc
+
+## a) All genes
+
+``` bash
+sbatch --output=3rmd.out --wrap=" source ./rmd_3.sh "
+```
+
+-   Choose resolution
+
+``` bash
+sbatch --output=4rmd.out --wrap=" source ./rmd_4.sh "
+```
+
+``` bash
+sbatch --output=objects.out --wrap=" source ./create_objects.sh "
+```
+
+## b) Metabo genes
+
+``` bash
+sbatch --output=metabo1.out --wrap=" source ./rmd_6.sh "
+```

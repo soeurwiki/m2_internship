@@ -1,0 +1,182 @@
+---
+title: "Filtering for one sample (2)"
+author: "ATIA Safiya"
+date: "2023-06-26"
+params:
+  sample: "sample"
+  pc: "pc"
+  doublet_rate: "doublet_rate"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Environment  
+## Load required packages  
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(DoubletFinder)
+library(tidyverse)
+library(viridis)
+```
+
+```{r,  message=FALSE, warning=FALSE}
+sample <- params$sample # sample_condition
+```
+
+## Loading data  
+*min.cells* : Include features detected in at least this many cells. Will subset the counts matrix as well.  
+*min.features* : Include cells where at least this many features are detected.  
+
+```{r, echo=FALSE}
+seurat_obj <- readRDS(file = paste0("./results/rds/Doublet_", sample, ".rds"))
+
+## Raw data
+QC_sample <- readRDS(file = paste0("./results/rds/QC_", sample, ".rds"))
+
+seurat_obj                  
+```
+
+##  <span style="color:#296d98;"> Parameters </span>  
+```{r}
+pc = as.numeric(params$pc)
+doublet_rate = as.double(params$doublet_rate)
+```
+
+# Doublet
+### Pre-process standard workflow  
+```{r, warning=FALSE, message=FALSE}
+seurat_obj <- FindNeighbors(seurat_obj, dims = 1:pc)
+seurat_obj <- FindClusters(seurat_obj)
+seurat_obj <- RunUMAP(seurat_obj, dims = 1:pc)
+```
+
+### pk optimisation  
+```{r, warning=FALSE, message=FALSE}
+sweep.res.list <- paramSweep_v3(seurat_obj, PCs = 1:pc, sct = FALSE)
+```
+```{r, warning=FALSE, message=FALSE}
+sweep.stats <- summarizeSweep(sweep.res.list, GT=FALSE)
+bcmvn <- find.pK(sweep.stats)
+```
+```{r, warning=FALSE, message=FALSE}
+ggplot(bcmvn, aes(pK, BCmetric, group=1)) +
+      geom_point() +
+      geom_line()
+
+# we select the pK that corresponds to max bcmvn to optimize doublet detection 
+pK <- bcmvn %>%
+  filter(BCmetric == max(BCmetric)) %>%
+  select(pK) 
+pK <- as.numeric(as.character(pK[[1]]))
+pK
+```
+
+### Homotypic Doublet Proportion Estimate 
+```{r, warning=FALSE, message=FALSE}
+annotations <- seurat_obj@meta.data$seurat_clusters
+homotypic.prop <- modelHomotypic(annotations)
+nExp_poi <- round(doublet_rate*nrow(seurat_obj@meta.data))  
+nExp_poi.adj <- round(nExp_poi*(1-homotypic.prop))
+
+# run doubletFinder 
+seurat_obj <- doubletFinder_v3(seurat_obj, 
+                                     PCs = 1:pc, 
+                                     pN = 0.25, 
+                                     pK = pK, 
+                                     nExp = nExp_poi.adj,
+                                     reuse.pANN = FALSE, sct = FALSE)
+```
+
+### Singlets and doublets  
+```{r, echo=FALSE}
+## retrieve column which classifies Singlets/Doublets
+col = colnames(seurat_obj[[]])[which(grepl('^DF.classifications', colnames(seurat_obj[[]])) ==TRUE )]
+
+## add this classification to raw data QC_sample
+QC_sample@meta.data$DF.classifications <- seurat_obj@meta.data[col][,1]
+```
+
+```{r}
+# visualize doublets
+DimPlot(seurat_obj, reduction = 'umap', group.by = col)
+
+# number of singlets and doublets
+table(QC_sample@meta.data$DF.classifications)
+```
+
+### Filter out doublets
+```{r}
+subset(
+  QC_sample,
+  DF.classifications == "Singlet"
+  ) -> QC_sample
+
+QC_sample
+```
+
+# QC metrics
+```{r}
+FeatureScatter(QC_sample, feature1 = "nCount_RNA", feature2 = "nFeature_RNA") + geom_smooth(method = 'lm')
+```
+
+```{r, warning=FALSE}
+as_tibble(
+  QC_sample[[]],
+  rownames="Cell.Barcode"
+) -> qc.metrics
+```
+
+## Nb of reads   
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(nCount_RNA), 
+                  color = "#558bdc", fill= "#173664",
+                  binwidth = 50) + 
+  ggtitle("Distribution of nCount_RNA ") + NoLegend()
+```
+
+## Nb of genes  
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(nFeature_RNA), 
+                  color = "#558bdc", fill= "#173664",
+                  binwidth = 50) + 
+  ggtitle("Distribution of nFeature_RNA ") + NoLegend()
+```
+## MT genes  
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.mt), 
+                  color = "#558bdc", fill= "#173664",
+                  binwidth = 0.5) + 
+  ggtitle("Distribution of Percentage Mitochondrion") + NoLegend()
+```
+
+## Ribosomal genes  
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.ribosomal), 
+                  color = "#558bdc", fill= "#173664",
+                  binwidth = 0.5) + 
+  ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
+```
+
+## Largest gene  
+```{r}
+ggplot(qc.metrics) + 
+   geom_histogram(aes(percent.largest_gene), 
+                  color = "#558bdc", fill= "#173664",
+                  binwidth = 0.7) + 
+  ggtitle("Distribution of Percentage Largest Gene") + NoLegend()
+```
+ 
+# Save seurat object  
+```{r}
+saveRDS(QC_sample, file =paste0("./results/rds/samples/Filtered_",sample,".rds"))
+```

@@ -1,0 +1,170 @@
+---
+title: "QC plots unfiltered"
+author: "ATIA Safiya"
+date: "2023-07-26"
+params:
+  sample: "sample"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Environment  
+## Load required packages  
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(viridis)
+```
+
+```{r,  message=FALSE, warning=FALSE}
+sample <- params$sample # sample_condition
+condition <- str_split_1(sample, '_')[2]
+```
+
+## Loading data  
+
+```{r}
+seurat_obj <- readRDS(file = paste0("./results/rds/mtx/mtx_", sample, ".rds"))
+                
+seurat_obj                  
+```
+
+# QC metrics (RAW)
+**nCount_RNA** : the total number of reads (or more correctly UMIs) in the dataset  
+**nFeature_RNA** : the number of observed genes (anything with a nonzero count)
+
+##  <span style="color:#296d98;"> Parameters </span>  
+```{r}
+## nCount
+x1 = 500
+## nFeature
+x2 = 220
+## Mitochondrion
+x3 = 15
+```
+
+## Nb of reads  
+```{r, message=FALSE}
+ggplot(seurat_obj[[]]) + 
+   geom_histogram(aes(nCount_RNA, 
+                  color = ifelse(nCount_RNA < x1 , "a", "b")),
+                  binwidth = 50) + 
+  scale_color_manual(values = c("a" = "#558bdc", "b" = "#173664")) +
+  theme_classic()+
+  xlim(c(0, 50000))+
+  ylim(c(0, 50))+
+  ggtitle("Distribution of nCount_RNA ") + NoLegend()
+```
+
+## Nb of genes  
+```{r}
+ggplot(seurat_obj[[]]) + 
+   geom_histogram(aes(nFeature_RNA, 
+                  color = ifelse(nFeature_RNA < x2 , "a", "b")),
+                  binwidth = 50) + 
+  scale_color_manual(values = c("a" = "#558bdc", "b" = "#173664")) +
+  xlim(c(0, 12000))+ 
+  ylim(c(0, 100))+
+  ggtitle("Distribution of nFeature_RNA ") + NoLegend()
+```
+
+
+## MT genes  
+
+```{r}
+seurat_obj[["percent.mt"]] <- PercentageFeatureSet(seurat_obj, pattern = "^MT-")
+
+ggplot(seurat_obj[[]]) + 
+   geom_histogram(aes(percent.mt, 
+                  color = ifelse(percent.mt < x3 , "a", "b"))) + 
+  scale_color_manual(values = c("a" = "#173664", "b" = "#558bdc")) + 
+  xlim(c(0, 100))+ 
+  ylim(c(0, 100))+
+  ggtitle("Distribution of Percentage Mitochondrion") + NoLegend()
+```
+
+## Ribosomal genes  
+
+```{r}
+PercentageFeatureSet(seurat_obj,pattern="^RP[LS]") -> seurat_obj[["percent.ribosomal"]] 
+
+ggplot(seurat_obj[[]]) + 
+   geom_histogram(aes(percent.ribosomal), 
+                  color = "#173664", fill= "#558bdc") + 
+    xlim(c(0, 30))+ 
+  ylim(c(0, 200))+
+  ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
+```
+
+
+
+# Filtering  
+```{r}
+rm(seurat_obj)
+seurat_obj <- readRDS(file = paste0("./results/rds/samples/Filtered_", sample, ".rds"))
+                
+seurat_obj                  
+```
+
+# QC metrics (after filtering)
+**nCount_RNA** : the total number of reads (or more correctly UMIs) in the dataset  
+**nFeature_RNA** : the number of observed genes (anything with a nonzero count)
+
+## Nb of reads  
+```{r, message=FALSE}
+ggplot(seurat_obj[[]]) + 
+   geom_histogram(aes(nCount_RNA, 
+                  color = ifelse(nCount_RNA < x1 , "a", "b")),
+                  binwidth = 50) + 
+  scale_color_manual(values = c("a" = "#558bdc", "b" = "#173664")) +
+  theme_classic()+
+  xlim(c(0, 50000))+
+  ylim(c(0, 50))+
+  ggtitle("Distribution of nCount_RNA ") + NoLegend()
+```
+
+## Nb of genes  
+```{r}
+ggplot(seurat_obj[[]]) + 
+   geom_histogram(aes(nFeature_RNA, 
+                  color = ifelse(nFeature_RNA < x2 , "a", "b")),
+                  binwidth = 50) + 
+  scale_color_manual(values = c("a" = "#558bdc", "b" = "#173664")) +
+  xlim(c(0, 12000))+ 
+  ylim(c(0, 100))+
+  ggtitle("Distribution of nFeature_RNA ") + NoLegend()
+```
+
+
+## MT genes  
+
+```{r}
+seurat_obj[["percent.mt"]] <- PercentageFeatureSet(seurat_obj, pattern = "^MT-")
+
+ggplot(seurat_obj[[]]) + 
+   geom_histogram(aes(percent.mt, 
+                  color = ifelse(percent.mt < x3 , "a", "b"))) + 
+  scale_color_manual(values = c("a" = "#173664", "b" = "#558bdc")) + 
+  xlim(c(0, 100))+ 
+  ylim(c(0, 100))+
+  ggtitle("Distribution of Percentage Mitochondrion") + NoLegend()
+```
+
+## Ribosomal genes  
+
+```{r}
+PercentageFeatureSet(seurat_obj,pattern="^RP[LS]") -> seurat_obj[["percent.ribosomal"]] 
+
+ggplot(seurat_obj[[]]) + 
+   geom_histogram(aes(percent.ribosomal), 
+                  color = "#173664", fill= "#558bdc") + 
+    xlim(c(0, 30))+ 
+  ylim(c(0, 200))+
+  ggtitle("Distribution of Percentage Ribosomal") + NoLegend()
+```

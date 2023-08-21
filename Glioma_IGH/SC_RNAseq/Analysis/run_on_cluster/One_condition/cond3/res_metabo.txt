@@ -1,0 +1,16 @@
+BT1_prolif      0.3
+BT2_prolif      0.5
+BT54_prolif     0.3
+BT88_prolif     0.3
+LGG85_prolif    0.5
+LGG275_prolif   0.4
+LGG336_prolif   0.3
+LGG349_prolif   0.4
+BT1_diff      0.6
+BT2_diff      0.6
+BT54_diff     0.5
+BT88_diff     0.3
+LGG85_diff    0.8
+LGG275_diff   0.7
+LGG336_diff   0.3
+LGG349_diff   0.4s

@@ -1,0 +1,74 @@
+---
+title: "Plots for merged samples [Normalized]"
+author: "ATIA Safiya"
+date: "2023-07-27"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+library(clustree)
+library("viridis")
+```
+
+## Load seurat object (NORM)
+
+```{r}
+seurat_obj <- readRDS(file = './results/rds/all_samples_Clusters.rds')
+
+seurat_obj
+table(seurat_obj$orig.ident)
+levels(seurat_obj$seurat_clusters)
+```
+
+## Load seurat object (METABO)
+```{r}
+metabo_obj <- readRDS(file = './results/rds/all_samples_Markers_metabo.rds')
+
+metabo_obj
+table(metabo_obj$orig.ident)
+levels(metabo_obj$seurat_clusters)
+```
+
+# Comparison
+```{r}
+seurat_obj$cluster.2 = metabo_obj$seurat_clusters
+table(rownames(seurat_obj[[]]) == rownames(metabo_obj[[]]))
+```
+
+```{r}
+seurat_obj$cluster.1 <- seurat_obj$seurat_clusters
+colnames(seurat_obj[[]])
+```
+
+
+```{r}
+clustree(seurat_obj, prefix = "cluster.")
+```
+
+# Comparison
+```{r}
+seurat_obj$cluster.1 = metabo_obj$seurat_clusters
+table(rownames(seurat_obj[[]]) == rownames(metabo_obj[[]]))
+```
+
+```{r}
+seurat_obj$cluster.2 <- seurat_obj$seurat_clusters
+colnames(seurat_obj[[]])
+```
+
+
+```{r}
+clustree(seurat_obj, prefix = "cluster.")
+```

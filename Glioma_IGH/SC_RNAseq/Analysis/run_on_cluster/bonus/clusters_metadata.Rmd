@@ -1,0 +1,433 @@
+---
+title: "Metadata [Normalized]"
+author: "ATIA Safiya"
+date: "2023-08-17"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+
+library("viridis")
+```
+
+## Load seurat object (NORM)
+
+```{r}
+seurat_obj <- readRDS(file = './results/rds/all_samples_Clusters.rds')
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+# All genes
+## line
+```{r}
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  line = seurat_obj$line,
+) %>%
+  group_by(cluster,line) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=line)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+## grade
+```{r}
+seurat_obj@meta.data$grade <- "i"
+seurat_obj@meta.data$idh <- "mutant"
+metadata <- seurat_obj@meta.data
+
+cells <- rownames(metadata[metadata$line == "BT1",])
+seurat_obj@meta.data[cells, "grade"] <- "III"
+seurat_obj@meta.data[cells, "idh"] <- "WT"
+
+cells <- rownames(metadata[metadata$line == "BT2",])
+seurat_obj@meta.data[cells, "grade"] <- "III"
+
+cells <- rownames(metadata[metadata$line == "BT54",])
+seurat_obj@meta.data[cells, "grade"] <- "III"
+
+cells <- rownames(metadata[metadata$line == "BT88",])
+seurat_obj@meta.data[cells, "grade"] <- "III"
+seurat_obj@meta.data[cells, "idh"] <- "WT"
+
+cells <- rownames(metadata[metadata$line == "LGG275",])
+seurat_obj@meta.data[cells, "grade"] <- "II"
+
+cells <- rownames(metadata[metadata$line == "LGG336",])
+seurat_obj@meta.data[cells, "grade"] <- "II"
+
+cells <- rownames(metadata[metadata$line == "LGG349",])
+seurat_obj@meta.data[cells, "grade"] <- "IV"
+
+
+cells <- rownames(metadata[metadata$line == "LGG85",])
+seurat_obj@meta.data[cells, "grade"] <- "IV"
+```
+
+```{r}
+colors = c(II='#e0c737', III='#ff7230', IV='#861d1d' )
+
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  grade = seurat_obj$grade,
+) %>%
+  group_by(cluster,grade) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=grade)) +
+  scale_fill_manual( values= colors ) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+## IDH1
+```{r}
+colors = c(mutant='#b42c2c', WT='#1f2122' )
+
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  idh = seurat_obj$idh,
+) %>%
+  group_by(cluster,idh) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=idh)) +
+  scale_fill_manual( values= colors ) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+## condition
+```{r}
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  condition = seurat_obj$condition,
+) %>%
+  group_by(cluster,condition) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=condition)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+## cell cycle
+```{r}
+colors = c(G1='azure4',G2M='dodgerblue',S='tomato3' )
+
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  Phase = seurat_obj$Phase,
+) %>%
+  group_by(cluster,Phase) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=Phase)) +
+  scale_fill_manual( values= colors ) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+## Oligo/Astro
+```{r}
+colors <- c(astro='seagreen4', mature_oligo='orangered3', unknown="lightgray")
+
+tibble(
+  cluster = seurat_obj$seurat_clusters,
+  annotations = seurat_obj$scina_labels,
+) %>%
+  group_by(cluster,annotations) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=annotations)) +
+  scale_fill_manual( values= colors ) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+# Metabo genes
+## Load seurat object (METABO)
+```{r}
+rm(seurat_obj)
+metabo_obj <- readRDS(file = './results/rds/all_samples_Clusters_metabo_0.4.rds')
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
+## line
+```{r}
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  line = metabo_obj$line,
+) %>%
+  group_by(cluster,line) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=line)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+## grade
+```{r}
+metabo_obj@meta.data$grade <- "i"
+metabo_obj@meta.data$idh <- "mutant"
+metadata <- metabo_obj@meta.data
+
+cells <- rownames(metadata[metadata$line == "BT1",])
+metabo_obj@meta.data[cells, "grade"] <- "III"
+metabo_obj@meta.data[cells, "idh"] <- "WT"
+
+cells <- rownames(metadata[metadata$line == "BT2",])
+metabo_obj@meta.data[cells, "grade"] <- "III"
+
+cells <- rownames(metadata[metadata$line == "BT54",])
+metabo_obj@meta.data[cells, "grade"] <- "III"
+
+cells <- rownames(metadata[metadata$line == "BT88",])
+metabo_obj@meta.data[cells, "grade"] <- "III"
+metabo_obj@meta.data[cells, "idh"] <- "WT"
+
+cells <- rownames(metadata[metadata$line == "LGG275",])
+metabo_obj@meta.data[cells, "grade"] <- "II"
+
+cells <- rownames(metadata[metadata$line == "LGG336",])
+metabo_obj@meta.data[cells, "grade"] <- "II"
+
+cells <- rownames(metadata[metadata$line == "LGG349",])
+metabo_obj@meta.data[cells, "grade"] <- "IV"
+
+
+cells <- rownames(metadata[metadata$line == "LGG85",])
+metabo_obj@meta.data[cells, "grade"] <- "IV"
+```
+
+```{r}
+colors = c(II='#e0c737', III='#ff7230', IV='#861d1d' )
+
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  grade = metabo_obj$grade,
+) %>%
+  group_by(cluster,grade) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=grade)) +
+  scale_fill_manual( values= colors ) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+## IDH1
+```{r}
+colors = c(mutant='#b42c2c', WT='#1f2122' )
+
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  idh = metabo_obj$idh,
+) %>%
+  group_by(cluster,idh) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=idh)) +
+  scale_fill_manual( values= colors ) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+## condition
+```{r}
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  condition = metabo_obj$condition,
+) %>%
+  group_by(cluster,condition) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=condition)) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+## cell cycle
+```{r}
+colors = c(G1='azure4',G2M='dodgerblue',S='tomato3' )
+
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  Phase = metabo_obj$Phase,
+) %>%
+  group_by(cluster,Phase) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=Phase)) +
+  scale_fill_manual( values= colors ) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
+
+## Oligo/Astro
+```{r}
+colors <- c(astro='seagreen4', mature_oligo='orangered3', unknown="lightgray")
+
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  annotations = metabo_obj$scina_labels,
+) %>%
+  group_by(cluster,annotations) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=annotations)) +
+  scale_fill_manual( values= colors ) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```

@@ -1,0 +1,135 @@
+---
+title: "Markers of clusters for merged samples [Normalized]"
+author: "ATIA Safiya"
+date: "2023-07-27"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Objects 
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+options(future.globals.maxSize = 8000 * 1024^2)
+```
+
+## Load markers
+
+```{r}
+all_clusters <- readRDS(file = "./results/html/all_samples_cluster.markers.rds")
+dim(all_clusters)
+```
+
+```{r}
+all_metabo <- readRDS(file = "./results/html/all_samples_cluster.markers_metabo.rds")
+dim(all_metabo)
+```
+
+
+```{r}
+seurat_obj <- readRDS(file = './results/rds/all_samples_Clusters.rds')
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+
+```{r}
+metabo_obj <- readRDS(file = './results/rds/all_samples_Clusters_metabo.rds')
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
+## Biomarkers all genes  
+
+* `DoHeatmap` generates an expression heatmap for given cells and features. In this case, we are plotting the top 20 markers (or all markers if less than 20) for each cluster.   
+
+```{r}
+prolif <- all_clusters[which( all_clusters$diff_p_val == all_clusters$max_pval), ]
+diff <- all_clusters[which( all_clusters$prolif_p_val == all_clusters$max_pval), ]
+dim(prolif)
+dim(diff)
+```
+
+```{r}
+prolif <- prolif[, c('prolif_p_val', 'prolif_avg_log2FC', 'prolif_p_val_adj', 'gene', 'cluster' )]
+head(prolif)
+```
+
+```{r}
+diff <- diff[, c('diff_p_val', 'diff_avg_log2FC', 'diff_p_val_adj', 'gene', 'cluster' )]
+head(diff)
+```
+
+```{r}
+diff_markers <- diff[order(diff$diff_p_val_adj, decreasing = FALSE),]
+prolif_markers <- diff[order(prolif$prolif_p_val_adj, decreasing = FALSE),]
+```
+
+```{r, warning=FALSE, message=FALSE}
+diff_markers %>%
+    group_by(cluster) %>%
+    top_n(n = 10, wt = diff_avg_log2FC) -> top10
+
+top10
+DoHeatmap(seurat_obj, features = top10$gene) + NoLegend()
+
+prolif_markers %>%
+    group_by(cluster) %>%
+    top_n(n = 10, wt = diff_avg_log2FC) -> top10
+
+top10
+DoHeatmap(seurat_obj, features = top10$gene) + NoLegend()
+```
+
+
+## Biomarkers metabo genes  
+
+* `DoHeatmap` generates an expression heatmap for given cells and features. In this case, we are plotting the top 20 markers (or all markers if less than 20) for each cluster.   
+
+```{r}
+prolif <- all_metabo[which( all_metabo$diff_p_val == all_metabo$max_pval), ]
+diff <- all_metabo[which( all_metabo$prolif_p_val == all_metabo$max_pval), ]
+dim(prolif)
+dim(diff)
+```
+
+```{r}
+prolif <- prolif[, c('prolif_p_val', 'prolif_avg_log2FC', 'prolif_p_val_adj', 'gene', 'cluster' )]
+head(prolif)
+```
+
+```{r}
+diff <- diff[, c('diff_p_val', 'diff_avg_log2FC', 'diff_p_val_adj', 'gene', 'cluster' )]
+head(diff)
+```
+
+```{r}
+diff_markers <- diff[order(diff$diff_p_val_adj, decreasing = FALSE),]
+prolif_markers <- diff[order(prolif$prolif_p_val_adj, decreasing = FALSE),]
+```
+
+```{r, warning=FALSE, message=FALSE}
+diff_markers %>%
+    group_by(cluster) %>%
+    top_n(n = 10, wt = diff_avg_log2FC) -> top10
+
+top10
+DoHeatmap(metabo_obj, features = top10$gene) + NoLegend()
+
+prolif_markers %>%
+    group_by(cluster) %>%
+    top_n(n = 10, wt = diff_avg_log2FC) -> top10
+    
+top10
+DoHeatmap(metabo_obj, features = top10$gene) + NoLegend()
+```

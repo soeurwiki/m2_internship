@@ -1,0 +1,194 @@
+---
+title: "Metadata [Normalized]"
+author: "ATIA Safiya"
+date: "2023-08-17"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library(ggplot2)
+
+library("viridis")
+```
+
+## Load seurat object (NORM)
+
+```{r}
+seurat_obj <- readRDS(file = './results/rds/all_samples_Clusters.rds')
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+# All genes
+## line
+```{r}
+DimPlot(seurat_obj, reduction = "umap", group.by = "line")
+```
+
+## grade
+```{r}
+seurat_obj@meta.data$grade <- "i"
+seurat_obj@meta.data$idh <- "mutant"
+metadata <- seurat_obj@meta.data
+
+cells <- rownames(metadata[metadata$line == "BT1",])
+seurat_obj@meta.data[cells, "grade"] <- "III"
+seurat_obj@meta.data[cells, "idh"] <- "WT"
+
+cells <- rownames(metadata[metadata$line == "BT2",])
+seurat_obj@meta.data[cells, "grade"] <- "III"
+
+cells <- rownames(metadata[metadata$line == "BT54",])
+seurat_obj@meta.data[cells, "grade"] <- "III"
+
+cells <- rownames(metadata[metadata$line == "BT88",])
+seurat_obj@meta.data[cells, "grade"] <- "III"
+seurat_obj@meta.data[cells, "idh"] <- "WT"
+
+cells <- rownames(metadata[metadata$line == "LGG275",])
+seurat_obj@meta.data[cells, "grade"] <- "II"
+
+cells <- rownames(metadata[metadata$line == "LGG336",])
+seurat_obj@meta.data[cells, "grade"] <- "II"
+
+cells <- rownames(metadata[metadata$line == "LGG349",])
+seurat_obj@meta.data[cells, "grade"] <- "IV"
+
+
+cells <- rownames(metadata[metadata$line == "LGG85",])
+seurat_obj@meta.data[cells, "grade"] <- "IV"
+```
+
+```{r}
+colors = c(II='#e0c737', III='#ff7230', IV='#861d1d' )
+
+DimPlot(seurat_obj, reduction = "umap", group.by = "grade", cols = colors)
+DimPlot(seurat_obj, reduction = "umap", group.by = "grade", split.by = "grade", cols = colors)  + NoLegend()
+```
+
+## IDH1
+```{r}
+colors = c(mutant='#b42c2c', WT='#1f2122' )
+
+DimPlot(seurat_obj, reduction = "umap", group.by = "idh", cols = colors)
+DimPlot(seurat_obj, reduction = "umap", group.by = "idh", split.by = "idh", cols = colors)  + NoLegend()
+```
+
+## condition
+```{r}
+DimPlot(seurat_obj, reduction = "umap", group.by = "condition")
+DimPlot(seurat_obj, reduction = "umap", group.by = "condition", split.by = "condition")  + NoLegend()
+```
+
+## cell cycle
+```{r}
+colors = c(G1='azure4',G2M='dodgerblue',S='tomato3' )
+
+DimPlot(seurat_obj, reduction = "umap", group.by = "Phase", cols = colors)
+DimPlot(seurat_obj, reduction = "umap", group.by = "Phase", split.by="Phase", cols = colors)  + NoLegend()
+```
+
+## Oligo/Astro
+```{r}
+colors <- c(astro='seagreen4', mature_oligo='orangered3', unknown="lightgray")
+
+DimPlot(seurat_obj, reduction = "umap", group.by = "scina_labels", cols = colors)
+DimPlot(seurat_obj, reduction = "umap", group.by = "scina_labels", split.by = "scina_labels",cols = colors) + NoLegend()
+```
+
+## Metabo genes
+## Load seurat object (METABO)
+```{r}
+rm(seurat_obj)
+metabo_obj <- readRDS(file = './results/rds/all_samples_Clusters_metabo.rds')
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
+## line
+```{r}
+DimPlot(metabo_obj, reduction = "umap", group.by = "line")
+```
+
+## grade
+```{r}
+metabo_obj@meta.data$grade <- "i"
+metabo_obj@meta.data$idh <- "mutant"
+metadata <- metabo_obj@meta.data
+
+cells <- rownames(metadata[metadata$line == "BT1",])
+metabo_obj@meta.data[cells, "grade"] <- "III"
+metabo_obj@meta.data[cells, "idh"] <- "WT"
+
+cells <- rownames(metadata[metadata$line == "BT2",])
+metabo_obj@meta.data[cells, "grade"] <- "III"
+
+cells <- rownames(metadata[metadata$line == "BT54",])
+metabo_obj@meta.data[cells, "grade"] <- "III"
+
+cells <- rownames(metadata[metadata$line == "BT88",])
+metabo_obj@meta.data[cells, "grade"] <- "III"
+metabo_obj@meta.data[cells, "idh"] <- "WT"
+
+cells <- rownames(metadata[metadata$line == "LGG275",])
+metabo_obj@meta.data[cells, "grade"] <- "II"
+
+cells <- rownames(metadata[metadata$line == "LGG336",])
+metabo_obj@meta.data[cells, "grade"] <- "II"
+
+cells <- rownames(metadata[metadata$line == "LGG349",])
+metabo_obj@meta.data[cells, "grade"] <- "IV"
+
+
+cells <- rownames(metadata[metadata$line == "LGG85",])
+metabo_obj@meta.data[cells, "grade"] <- "IV"
+```
+
+```{r}
+colors = c(II='#e0c737', III='#ff7230', IV='#861d1d' )
+
+DimPlot(metabo_obj, reduction = "umap", group.by = "grade", cols = colors)
+DimPlot(metabo_obj, reduction = "umap", group.by = "grade", split.by = "grade", cols = colors)  + NoLegend()
+```
+
+## IDH1
+```{r}
+colors = c(mutant='#b42c2c', WT='#1f2122' )
+DimPlot(metabo_obj, reduction = "umap", group.by = "idh", cols = colors)
+DimPlot(metabo_obj, reduction = "umap", group.by = "idh", split.by = "idh", cols = colors)  + NoLegend()
+```
+
+## condition
+```{r}
+DimPlot(metabo_obj, reduction = "umap", group.by = "condition")
+DimPlot(metabo_obj, reduction = "umap", group.by = "condition", split.by = "condition")  + NoLegend()
+```
+
+## cell cycle
+```{r}
+colors = c(G1='azure4',G2M='dodgerblue',S='tomato3' )
+
+DimPlot(metabo_obj, reduction = "umap", group.by = "Phase", cols = colors)
+DimPlot(metabo_obj, reduction = "umap", group.by = "Phase", split.by="Phase", cols = colors)  + NoLegend()
+```
+
+## Oligo/Astro
+```{r}
+colors <- c(astro='seagreen4', mature_oligo='orangered3', unknown="lightgray")
+
+DimPlot(metabo_obj, reduction = "umap", group.by = "scina_labels", cols = colors)
+DimPlot(metabo_obj, reduction = "umap", group.by = "scina_labels", split.by = "scina_labels",cols = colors) + NoLegend()
+```
