@@ -1,0 +1,74 @@
+---
+title: "METABO -- Predictions of Markers for merged samples"
+author: "ATIA Safiya"
+date: "2023-08-20"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_collapsed: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+---
+
+# Seurat object  
+## Load required packages
+```{r,  message=FALSE, warning=FALSE}
+library(Seurat)
+library(tidyverse)
+library("SCINA")
+library(ggplot2)
+```
+
+## Load seurat object (ALL GENES)
+
+```{r}
+seurat_obj <- readRDS(file = './results/rds/all_samples_Clusters.rds')
+
+seurat_obj
+table(seurat_obj$orig.ident)
+```
+
+## Load seurat object (METABO)
+```{r}
+metabo_obj <- readRDS(file = './results/rds/all_samples_Clusters_metabo.rds')
+
+metabo_obj
+table(metabo_obj$orig.ident)
+```
+
+# Oligo/Astro from all genes
+
+```{r}
+metabo_obj$scina_labels <- seurat_obj$scina_labels
+colors <- c(astro='seagreen4', mature_oligo='orangered3', unknown="lightgray")
+
+DimPlot(metabo_obj,reduction = "umap", group.by = "scina_labels", cols = colors)
+```
+
+
+```{r}
+tibble(
+  cluster = metabo_obj$seurat_clusters,
+  Annotation = metabo_obj$scina_labels,
+) %>%
+  group_by(cluster,Annotation) %>%
+  count() %>%
+  group_by(cluster) %>%
+  mutate(
+    percent=(100*n)/sum(n)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    cluster=paste("Cluster",cluster)
+  ) %>%
+  ggplot(aes(x="",y=percent, fill=Annotation)) +
+  scale_fill_manual( values= colors ) +
+  geom_col(width=1) +
+  coord_polar("y", start=0) +
+  facet_wrap(vars(cluster)) +  
+  theme(axis.text.x=element_blank()) +
+  xlab(NULL) +
+  ylab(NULL)
+```
