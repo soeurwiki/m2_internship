@@ -3,7 +3,7 @@ samples/
 results/
 html/
 
-*.ipynb
+#*.ipynb
 *.rds
 *.html
 
@@ -11,6 +11,3 @@ html/
 *.fastq
 *.sif
 
-Glioma_IGH/SC_RNAseq/Analysis/Scripts/All_genes/*.R
-Glioma_IGH/SC_RNAseq/Analysis/Scripts/Metabo_genes/*.R
-Glioma_IGH/SC_RNAseq/Analysis/Scripts/Per_sample/*.R
