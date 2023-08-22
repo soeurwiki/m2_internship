@@ -1,6 +1,7 @@
 # Git content
 
 --- BULK_RNAseq ---
+``` bash
 .
 ├── Analysis
 │   └── ...
@@ -9,8 +10,9 @@
     ├── get_files.sh
     ├── read_fastq.py
     └── run_pipeline.sh
-
+```
 --- SC_RNAseq ---
+``` bash
 .
 ├── Analysis
 │   ├── container_singularity
@@ -79,7 +81,7 @@
     ├── get_files.sh
     ├── get_mtx_genotoul.sh
     └── run_pipeline.sh
-    
+```  
 ------------------------------------------------------------------------
 # Scripts order
 
