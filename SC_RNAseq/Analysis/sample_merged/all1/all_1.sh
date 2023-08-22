@@ -32,7 +32,6 @@ echo -e "\n                --------------------                 Done !          
 
 
 echo -e " Next step : Choose pc & run all_2.sh "
-echo -e " Next step : Choose pc & run all_5.sh "
 
 end=$(date +%s)
 echo "Elapsed Time in total : $(($end-$start)) seconds"
