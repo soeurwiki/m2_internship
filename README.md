@@ -16,7 +16,7 @@
 │   │   ├── all1/2/3
 │   │   │   └── [files to run the analysis for merged samples]
 │   └── scripts_bonus
-│       └── ...
+│       └── [various scripts to plot metadata, etc]
 │   
 └── Processing
     └── [files to run the nf-core pipeline to get count matrices from fastq files]
@@ -26,7 +26,7 @@
 ``` bash
 .
 ├── Analysis
-│   └── ...
+│   └── ... 
 └── Processing
     ├── Bulk_Glioma.csv
     ├── get_files.sh
