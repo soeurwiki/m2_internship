@@ -36,4 +36,4 @@ echo -e "\n                --------------------                Done !           
 end=$(date +%s)
 echo "Elapsed Time in total : $(($end-$start)) seconds"
 
-echo -e " Next step : modify args.txt (pc + doublet_rate) & run rmd_2.sh "
+echo -e " Next step : run rmd_2.sh "

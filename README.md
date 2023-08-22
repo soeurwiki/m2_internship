@@ -8,21 +8,35 @@
 -   Run `run_pipeline.sh`
 
 ``` bash
-source ./Processing/get_files.sh
-source ./Processing/run_pipeline.sh
-```
-
-*On YOUR computer*
-
--   Run `get_mtx_genotoul.sh` : Change path to samples counts if needed.
-
-``` bash
-source ./Processing/get_mtx_genotoul.sh
+source ./SC_RNAseq/Processing/get_files.sh
+source ./SC_RNAseq/Processing/run_pipeline.sh
 ```
 
 ## 2- Analysis
 
-sudo singularity build --writable-tmpfs r.sif singularity-r.def
+**Construction of singularity image for R**
+``` bash
+sudo singularity build --writable-tmpfs r.sif ./SC_RNAseq/Analysis/container_singularity/singularity-r.def
+```
+
+### Filtering samples
+``` bash
+sbatch --wrap=" ./SC_RNAseq/Analysis/sample_indiv/line0/line_0.0.sh"
+```
+-   `line_0.0.sh` 
+
+    -   `create_seurat_samples.R`
+
+``` bash
+sbatch --wrap=" ./SC_RNAseq/Analysis/sample_indiv/line0/line_0.1.sh"
+```
+-   `line_0.1.sh` 
+    -   `run_filter.R`
+
+--- Choisir le nombre de pc ---
+``` bash
+sbatch --wrap=" ./SC_RNAseq/Analysis/sample_indiv/line0/line_0.2.sh"
+```
 
 ### a) Per sample
 

@@ -35,8 +35,6 @@ done
 
 echo -e " Filtering of all samples done !"
 
-
-
 echo -e "\n                --------------------                 Done !                  --------------------\n"
 
 end=$(date +%s)
