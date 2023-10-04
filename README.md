@@ -69,7 +69,7 @@ sbatch --wrap=" ./SC_RNAseq/Analysis/sample_indiv/line0/line_0.1.sh"
     -   `run_filter.R`
         -   `one_sample_RAW_1.Rmd`: Filter one sample based on nCount, nFeature_RNA and percent Mitochondrion.
 
-**Modify args.txt (pc + doublet_rate)**
+**Modify args.txt (pc + doublet_rate), then run:**
 
 ``` bash
 sbatch --wrap=" ./SC_RNAseq/Analysis/sample_indiv/line0/line_0.2.sh"
@@ -89,7 +89,7 @@ sbatch --wrap=" ./SC_RNAseq/Analysis/sample_merged/all1/all_1.sh"
         -   `all_samples_NORM_1.Rmd`: run PCA
         -   `all_samples_metabo_1.Rmd`
 
-**Choose number of PC for all_genes & metabo**
+**Choose number of PC for all_genes & metabo, then run:**
 
 ``` bash
 sbatch --wrap=" ./SC_RNAseq/Analysis/sample_merged/all2/all_2.sh"
@@ -99,7 +99,7 @@ sbatch --wrap=" ./SC_RNAseq/Analysis/sample_merged/all2/all_2.sh"
         -   `all_samples_NORM_2.Rmd`: run UMAP, tSNE and clustree (to visualize resolution for clusters)
         -   `all_samples_metabo_2.Rmd`
 
-**Choose resolution for all_genes & metabo**
+**Choose resolution for all_genes & metabo, then run:**
 
 ``` bash
 sbatch --wrap=" ./SC_RNAseq/Analysis/sample_merged/all3/all_3.sh"
