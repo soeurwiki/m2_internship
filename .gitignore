@@ -3,7 +3,7 @@ samples/
 results/
 html/
 
-*.ipynb
+#*.ipynb
 *.rds
 *.html
 
