@@ -11,7 +11,7 @@
 │   │   ├── line0
 │   │   │   └── [files to create create seurat objects from count matrix + Filtering]
 │   │   ├── line1/2/3
-│   │   │   └── [files to run the analysis for each line]
+│   │   │   └── [files to run the analysis for each lineage]
 │   ├── sample_merged
 │   │   ├── all1/2/3
 │   │   │   └── [files to run the analysis for merged samples]
@@ -79,7 +79,7 @@ sbatch --wrap=" ./SC_RNAseq/Analysis/sample_indiv/line0/line_0.2.sh"
         -   `one_sample_RAW_2.Rmd`
 
 ### c) Merging samples + analysis
-*For an analysis line specific, replace `all1/all_1.sh` by `line1/line_1.sh`*
+*For an analysis lineage specific, replace `all1/all_1.sh` by `line1/line_1.sh`*
 
 ``` bash
 sbatch --wrap=" ./SC_RNAseq/Analysis/sample_merged/all1/all_1.sh"
