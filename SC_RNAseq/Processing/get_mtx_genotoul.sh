@@ -1,5 +1,13 @@
 #!/bin/bash
 
+#   name : get_mtx_genotoul.sh
+#
+#   Author (2023)  Safiya ATIA
+#
+#   This code is runned to retrieve an entire folder from your genotoul space
+#   on a personal computer using sshpass (logging in with your username and password).
+
+
 ##  sudo apt install sshpass
 
 read -p " Genotoul username: " username

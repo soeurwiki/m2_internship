@@ -1,11 +1,19 @@
 #!/bin/bash
 
-module load system/jdk-12.0.2
-module load bioinfo/Nextflow-v22.12.0-edge
+#   name : run_pipeline.sh
+#
+#   Author (2023)  Safiya ATIA
+#
+#   This code is to be runned on your genotoul space
+#   to process your single cell data
+#
+#   (Genobioinfo cluster)
 
-module load system/singularity-3.7.3
+module load devel/java/17.0.6
+module load bioinfo/Nextflow/22.12.0-edge
 
-sh /usr/local/bioinfo/src/NextflowWorkflows/create_nfx_dirs.sh
+module load containers/singularity/3.9.9
+
 
 sbatch --output=sc_pipeline.out -c 8 --wrap="nextflow run nf-core/scrnaseq -profile genotoul \
         --input SC_Glioma.csv \
