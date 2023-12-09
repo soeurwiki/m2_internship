@@ -1,6 +1,11 @@
+#   name : line_2.sh
+#
+#   Author (2023)  Safiya ATIA
+
+module load containers/singularity/3.9.9
+
 ## ----- Create & organize workspace -----  ##
 start=$(date +%s)
-module load system/singularity-3.7.3
 
 samples=$(ls ./results/rds/mtx/ | grep '^mtx' | grep 'prolif.rds$' | sed 's/mtx_//g' | sed 's/_prolif.rds//g' )
 
@@ -14,6 +19,8 @@ for line in ${samples}; do
     sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/line2.out" --wrap="singularity exec r.sif Rscript run_clust.R all $line"
     sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/metabo2.out" --wrap="singularity exec r.sif Rscript run_clust.R metabo $line"
 done
+
+#  Outputs:
 
 ## line_FindNeighbors.rds
 ## one_line_NORM_2.html
