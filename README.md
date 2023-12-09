@@ -37,6 +37,7 @@
 # Scripts order (for scRNA-seq)
 
 *Scripts are written to be run on the cluster genotoul*
+*softwares:https://bioinfo.genotoul.fr/index.php/resources-2/softwares/*
 
 ## 1- Processing
 
@@ -51,6 +52,8 @@ source ./SC_RNAseq/Processing/run_pipeline.sh
 ## 2- Analysis
 
 ### a) Construction of singularity image for R
+*Do it on your computer and send r.sif on your genobioinfo cluster*
+
 ``` bash
 sudo singularity build --writable-tmpfs r.sif ./SC_RNAseq/Analysis/container_singularity/singularity-r.def
 ```
