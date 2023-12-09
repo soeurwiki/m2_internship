@@ -2,6 +2,8 @@
 #
 #   Author (2023)  Safiya ATIA
 
+module load containers/singularity/3.9.9
+
 start=$(date +%s)
 
 samples=$(ls ./results/rds/mtx/ | grep '^mtx' | grep 'prolif.rds$' | sed 's/mtx_//g' | sed 's/_prolif.rds//g' )

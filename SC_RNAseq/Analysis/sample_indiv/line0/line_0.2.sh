@@ -2,6 +2,8 @@
 #
 #   Author (2023)  Safiya ATIA
 
+module load containers/singularity/3.9.9
+
 ## ----- Create & organize workspace -----  ##
 start=$(date +%s)
 
