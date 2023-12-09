@@ -1,3 +1,7 @@
+#   name : run_annot.R
+#
+#   Author (2023)  Safiya ATIA
+
 args <- commandArgs(trailingOnly=TRUE)
 
 if(args[1] == "all_mark"){

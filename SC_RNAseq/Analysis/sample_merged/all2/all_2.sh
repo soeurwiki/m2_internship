@@ -1,7 +1,10 @@
-## ----- Create & organize workspace -----  ##
-start=$(date +%s)
-#module load system/singularity-3.7.3
+#   name : all_2.sh
+#
+#   Author (2023)  Safiya ATIA
+
 module load containers/singularity/3.9.9 
+
+start=$(date +%s)
 
 echo -e "\n                ---------------------------------------------------------------------------------"
 echo -e "\n                                                 Defining clusters                               "
@@ -10,6 +13,8 @@ echo -e "\n                -----------------------------------------------------
 
 sbatch -c 32 --mem-per-cpu=2048 --output="./out/all2.out" --wrap="singularity exec r.sif Rscript run_clust.R all"
 sbatch -c 32 --mem-per-cpu=2048 --output="./out/all_metabo2.out" --wrap="singularity exec r.sif Rscript run_clust.R metabo"
+
+#  Outputs:
 
 ## all_samples_FindNeighbors.rds
 ## all_samples_NORM_2.html

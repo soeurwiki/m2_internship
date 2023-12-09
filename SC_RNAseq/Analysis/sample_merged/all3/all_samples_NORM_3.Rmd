@@ -1,6 +1,6 @@
 ---
 title: "QC & Markers of clusters for merged samples [Normalized]"
-author: "ATIA Safiya"
+author: "Safiya ATIA"
 date: "2023-07-27"
 output:
   html_document:

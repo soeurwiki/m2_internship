@@ -1,3 +1,7 @@
+#   name : run_pca.R
+#
+#   Author (2023)  Safiya ATIA
+
 args <- commandArgs(trailingOnly=TRUE)
 
 if( args == "all"){
