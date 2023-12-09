@@ -1,6 +1,6 @@
 ---
 title: "container test"
-author: "ATIA Safiya"
+author: "Safiya ATIA"
 date: "2023-07-11"
 output:
   html_document:
@@ -17,6 +17,7 @@ It's a test.
 ```{r,  message=FALSE, warning=FALSE}
 library(Seurat)
 ```
+
 To build the image :
 
- sudo singularity build --writable-tmpfs r.sif singulariy-r.def  
+  sudo singularity build --writable-tmpfs r.sif singulariy-r.def  
