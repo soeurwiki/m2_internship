@@ -1,3 +1,7 @@
+#   name : run_filter.R
+#
+#   Author (2023)  Safiya ATIA
+
 args <- commandArgs(trailingOnly=TRUE)
 sample <- args[2]
 

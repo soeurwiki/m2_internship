@@ -1,6 +1,9 @@
+#   name : line_0.1.sh
+#
+#   Author (2023)  Safiya ATIA
+
 ## ----- Create & organize workspace -----  ##
 start=$(date +%s)
-module load system/singularity-3.7.3
 
 mkdir -p ./out
 mkdir -p ./results/html/samples
@@ -12,14 +15,13 @@ echo " Please check the .out files during each step to see if the script was not
 
 samples=$(ls ./results/rds/mtx/ | grep '^mtx' | sed 's/mtx_//g' | sed 's/.rds//g' )
 
-echo -e "\n                ---------------------------------------------------------------------------------\n"
-echo -e "                                                   Quality Check                                 "
+echo -e "\n                ---------------------------------------------------------------------------------"
+echo -e "\n                                                   Quality Check                                 "
 echo -e "\n                ---------------------------------------------------------------------------------"
 
 mkdir -p ./results/rds/samples
 
 for samp in ${samples}; do
-    ## mkdir -p ./results/html/${samp} change saveRDS
     mkdir -p ./out/${samp}
 
     echo -e " QC for $samp ..."
@@ -27,6 +29,7 @@ for samp in ${samples}; do
 
 done
 
+#  Outputs:
 ## QC_project.rds
 ## sample_RAW_qc.html
 
@@ -38,7 +41,6 @@ done
 
 ########### [Copy&paste] if code is stuck in loop ###########
 #############################################################
-module load containers/singularity/3.9.9 
 samples=$(ls ./results/rds/mtx/ | grep '^mtx' | sed 's/mtx_//g' | sed 's/.rds//g' )
 
 ## check samples

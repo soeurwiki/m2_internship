@@ -1,29 +1,34 @@
+#   name : line_0.0.sh
+#
+#   Author (2023)  Safiya ATIA
+
+module load containers/singularity/3.9.9
+
 start=$(date +%s)
-module load system/singularity-3.7.3
+
+## samples names
 samples=("BT1" "BT2" "BT54" "BT88" "LGG85" "LGG275" "LGG336" "LGG349")
 
+## ----- Create & organize workspace -----  ##
 mkdir -p ./out/mtx
 mkdir -p ./results/html/samples
 mkdir -p ./results/rds/mtx
 
 echo " Please check the .out files during each step to see if the script was not halted at one moment ... "
 
-
-echo -e "\n                ---------------------------------------------------------------------------------\n"
-echo -e "                                            Creation of seurat objects                           "
+echo -e "\n                ---------------------------------------------------------------------------------"
+echo -e "\n                                            Creation of seurat objects                           "
 echo -e "\n                ---------------------------------------------------------------------------------"
     
 for line in ${samples}; do
     diff="$line_diff"
     prolif="$line_prolif"
 
-    echo -e " The mtx rds files for $line are not present in  ./results/rds/mtx/. \n
-                Creation of the corresponding rds ... \n "
-
     sbatch -c 4 --output=./out/mtx/"$diff.out" --wrap="singularity exec r.sif Rscript 'create_seurat_samples.R $diff'"
     sbatch -c 4 --output=./out/mtx/"$prolif.out" --wrap="singularity exec r.sif Rscript 'create_seurat_samples.R $prolif'"
 done
 
+# Output: 
 ## mtx_project.rds
 
 for line in ${samples}; do

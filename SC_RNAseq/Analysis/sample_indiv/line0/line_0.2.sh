@@ -1,6 +1,9 @@
+#   name : line_0.2.sh
+#
+#   Author (2023)  Safiya ATIA
+
 ## ----- Create & organize workspace -----  ##
 start=$(date +%s)
-module load system/singularity-3.7.3
 
 mkdir -p ./out
 mkdir -p ./results/html/samples
@@ -11,8 +14,8 @@ echo " Please check the .out files during each step to see if the script was not
 
 # https://cdn.10xgenomics.com/image/upload/v1660261285/support-documents/CG000204_ChromiumNextGEMSingleCell3_v3.1_Rev_D.pdf
 
-echo -e "\n                ---------------------------------------------------------------------------------\n"
-echo -e "                                                     Filtering                                   "
+echo -e "\n                ---------------------------------------------------------------------------------"
+echo -e "\n                                                     Filtering                                   "
 echo -e "\n                ---------------------------------------------------------------------------------"
 
 while read args; do 
@@ -23,7 +26,7 @@ while read args; do
 
 done < args.txt  
 
-
+#  Outputs:
 ## Filtered_project.rds
 ## sample_RAW_filtered.html
 
