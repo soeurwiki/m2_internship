@@ -1,6 +1,6 @@
 ---
 title: "Metadata [Normalized]"
-author: "ATIA Safiya"
+author: "Safiya ATIA"
 date: "2023-08-17"
 output:
   html_document:

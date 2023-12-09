@@ -1,3 +1,7 @@
+#   name : bonus.sh
+#
+#   Author (2023)  Safiya ATIA
+
 ## ----- Create & organize workspace -----  ##
 module load system/singularity-3.7.3
 

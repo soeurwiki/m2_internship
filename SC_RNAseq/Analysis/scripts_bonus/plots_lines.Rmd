@@ -1,6 +1,6 @@
 ---
 title: "QC plots unfiltered"
-author: "ATIA Safiya"
+author: "Safiya ATIA"
 date: "2023-07-26"
 params:
   sample: "sample"

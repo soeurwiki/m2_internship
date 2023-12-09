@@ -1,3 +1,7 @@
+#   name : splsda.R
+#
+#   Author (2023)  Safiya ATIA
+
 library("mixOmics")
 
 X <- readRDS("X_plsda.rds")

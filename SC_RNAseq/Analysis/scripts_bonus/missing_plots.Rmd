@@ -1,6 +1,6 @@
 ---
 title: "plots [Normalized]"
-author: "ATIA Safiya"
+author: "Safiya ATIA"
 date: "2023-07-26"
 output:
   html_document:

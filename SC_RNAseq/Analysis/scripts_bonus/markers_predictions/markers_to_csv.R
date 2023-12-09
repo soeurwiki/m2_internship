@@ -1,3 +1,7 @@
+#   name : markers_to_csv.R
+#
+#   Author (2023)  Safiya ATIA
+
 # module load containers/singularity/3.9.9 
 # sbatch -c 8 --mem-per-cpu=2048 --wrap=" singularity exec r.sif Rscript markers_to_csv.R"
 

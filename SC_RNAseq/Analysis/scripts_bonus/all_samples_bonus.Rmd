@@ -1,6 +1,6 @@
 ---
 title: "METABO -- Clusters annotations for merged samples"
-author: "ATIA Safiya"
+author: "Safiya ATIA"
 date: "2023-06-26"
 output:
   html_document:

@@ -1,6 +1,6 @@
 ---
 title: "METABO -- Predictions of Markers for merged samples"
-author: "ATIA Safiya"
+author: "Safiya ATIA"
 date: "2023-08-20"
 output:
   html_document:
