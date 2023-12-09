@@ -1,3 +1,7 @@
+#   name : read_fastq.py
+#
+#   Author (2023)  Safiya ATIA
+
 filename="../../../../Glioma_IGH/Bulk_Gliome/LGG85_GF/new_LGG85_GF_1.fq"
 
 cts=0

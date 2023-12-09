@@ -1,3 +1,7 @@
+#   name : get_files.sh
+#
+#   Author (2023)  Safiya ATIA
+
 ## Create & organize workspace
 mkdir ./Reference
 mkdir ./Annotation

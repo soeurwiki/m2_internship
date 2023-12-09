@@ -1,3 +1,7 @@
+#   name : run_pipeline.sh
+#
+#   Author (2023)  Safiya ATIA
+
 module load system/jdk-12.0.2
 module load bioinfo/Nextflow-v22.12.0-edge
 module load system/singularity-3.7.3
