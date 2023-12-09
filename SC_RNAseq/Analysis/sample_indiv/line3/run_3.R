@@ -1,3 +1,7 @@
+#   name : run_3.R
+#
+#   Author (2023)  Safiya ATIA
+
 args <- commandArgs(trailingOnly=TRUE)
 
 line <- args[2]

@@ -1,6 +1,6 @@
 ---
 title: "METABO -- QC & Markers of clusters for merged samples"
-author: "ATIA Safiya"
+author: "Safiya ATIA"
 date: "2023-07-26"
 params:
   line: "line"

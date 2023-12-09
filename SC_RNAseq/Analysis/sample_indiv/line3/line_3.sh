@@ -1,6 +1,11 @@
+#   name : line_3.sh
+#
+#   Author (2023)  Safiya ATIA
+
+module load containers/singularity/3.9.9
+
 ## ----- Create & organize workspace -----  ##
 start=$(date +%s)
-module load system/singularity-3.7.3
 
 samples=$(ls ./results/rds/mtx/ | grep '^mtx' | grep 'prolif.rds$' | sed 's/mtx_//g' | sed 's/_prolif.rds//g' )
 
@@ -20,6 +25,8 @@ while read args; do
     echo -e "Running $line ..."
     sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/metabo3.out" --wrap="singularity exec r.sif Rscript run_3.R metabo_mark $args"
 done < res_metabo.txt
+
+#  Outputs:
 
 ## line_Markers.rds
 ## one_line_NORM_3.html
@@ -43,6 +50,7 @@ for line in ${samples}; do
     sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/mca_metabo.out" --wrap="singularity exec cellid_0.1.0.sif Rscript run_3.R metabo_mca $line"
 done
 
+#  Outputs:
 ## line_Mca.rds
 ## line_Mca_metabo.rds
 
@@ -60,6 +68,7 @@ for line in ${samples}; do
     sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/line4.out" --wrap="singularity exec r.sif Rscript run_3.R all_annot $line"
 done
 
+#  Outputs:
 ## line_Clusters.rds
 ## one_line_NORM_4.html
 
@@ -73,6 +82,7 @@ for line in ${samples}; do
     sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/metabo4.out" --wrap="singularity exec r.sif Rscript run_3.R metabo_annot $line"
 done
 
+#  Outputs:
 ## line_Clusters_metabo.rds
 ## one_line_metabo_4.html
 

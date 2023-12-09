@@ -1,3 +1,7 @@
+#   name : create_line_from_mergedSeurat.R
+#
+#   Author (2023)  Safiya ATIA
+
 library(Seurat)
 
 seurat_obj <- readRDS(file = './results/rds/merged_seurat_Clusters.rds')
