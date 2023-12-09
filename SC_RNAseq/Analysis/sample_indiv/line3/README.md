@@ -14,7 +14,7 @@ This folder contains :
 
 -   one_line_metabo_4.Rmd
 
--   run_3.R
+-   run_annot.R
 
 -   res_metabo.txt
 

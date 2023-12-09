@@ -17,13 +17,13 @@ echo -e "\n                -----------------------------------------------------
 while read args; do 
     line=$( echo ${args} | head -n1 | cut -d " " -f1)
     echo -e "Running $line ..."
-    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/line3.out" --wrap="singularity exec r.sif Rscript run_3.R all_mark $args"
+    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/line3.out" --wrap="singularity exec r.sif Rscript run_annot.R all_mark $args"
 done < res.txt
 
 while read args; do 
     line=$( echo ${args} | head -n1 | cut -d " " -f1)
     echo -e "Running $line ..."
-    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/metabo3.out" --wrap="singularity exec r.sif Rscript run_3.R metabo_mark $args"
+    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/metabo3.out" --wrap="singularity exec r.sif Rscript run_annot.R metabo_mark $args"
 done < res_metabo.txt
 
 #  Outputs:
@@ -46,8 +46,8 @@ echo -e "\n                -----------------------------------------------------
 
 for line in ${samples}; do
     echo -e "Running $line ..."
-    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/mca.out" --wrap="singularity exec cellid_0.1.0.sif Rscript run_3.R all_mca $line"
-    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/mca_metabo.out" --wrap="singularity exec cellid_0.1.0.sif Rscript run_3.R metabo_mca $line"
+    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/mca.out" --wrap="singularity exec cellid_0.1.0.sif Rscript run_annot.R all_mca $line"
+    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/mca_metabo.out" --wrap="singularity exec cellid_0.1.0.sif Rscript run_annot.R metabo_mca $line"
 done
 
 #  Outputs:
@@ -65,7 +65,7 @@ echo -e "\n                -----------------------------------------------------
 
 for line in ${samples}; do
     echo -e "Running $line ..."
-    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/line4.out" --wrap="singularity exec r.sif Rscript run_3.R all_annot $line"
+    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/line4.out" --wrap="singularity exec r.sif Rscript run_annot.R all_annot $line"
 done
 
 #  Outputs:
@@ -79,7 +79,7 @@ done
 
 for line in ${samples}; do
     echo -e "Running $line ..."
-    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/metabo4.out" --wrap="singularity exec r.sif Rscript run_3.R metabo_annot $line"
+    sbatch -c 8 --mem-per-cpu=2048 --output="./out/${line}/metabo4.out" --wrap="singularity exec r.sif Rscript run_annot.R metabo_annot $line"
 done
 
 #  Outputs:
