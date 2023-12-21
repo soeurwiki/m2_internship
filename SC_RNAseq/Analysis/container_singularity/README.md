@@ -14,7 +14,7 @@ This folder contains :
 
 #### To build the image :
 
-`sudo singularity build --writable-tmpfs r.sif singulariy-r.def`
+`sudo singularity build --writable-tmpfs r.sif singularity-r.def`
 
 *It cannot be build on the genotoul cluster because you'll need admin rights.*
 
