@@ -1,25 +1,43 @@
 R : 4.3.1
+singularity : 3.11.4 (on personal computer, to build the image)
+
 
 BiocManager : 1.30.22
 devtools : 2.4.5
 remotes : 2.4.2.1
+
+tidyverse : 2.0.0
+
+## ---------------- Rmarkdown --------------- ##
 rmarkdown : 2.23
 installr : 0.23.4
 
-viridis : 0.6.4
-glmGamPoi : 1.12.2
-sctransform : 0.3.5
-
-Seurat : 4.3.0.1
-harmony : 0.1.1
-tidyverse : 2.0.0
+## --------- Visualisations & plots --------- ##
 ggplot2 : 3.4.2
+viridis : 0.6.4
+scales : 1.2.1
+#ggpubr
+
+## ------------ Seurat functions ------------ ##
+Seurat : 4.3.0.1
+glmGamPoi : 1.12.2
+harmony : 0.1.1
+sctransform : 0.3.5
 clustree : 0.5.0
 future : 1.33.0
-enrichR : 3.2
-scales : 1.2.1
-SCINA : 1.2.0
-SiPSiC : 1.0.0
+
+## DoubletFinder
+DoubletFinder : 2.0.3
+
+## FindConservative Markers
+multtest : 2.56.0
+metap : 1.8
+
+## --------- Annotations & Pathways --------- ##
+#scater
+#destiny
 SingleR : 2.2.0
 
-singularity : 3.11.4 (on personal computer, to build the image)
+SCINA : 1.2.0
+SiPSiC : 1.0.0
+enrichR : 3.2
